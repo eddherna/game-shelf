@@ -1,0 +1,158 @@
+/* src/index.css */
+
+:root {
+  --alto-juego: 420px;
+  --ancho-tapa: 240px;
+  --ancho-lomo: 32px;
+  --vel-espacio: 0.4s;
+  --vel-giro: 0.5s;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  background-color: #1a1a1a;
+}
+
+/* --- ESTANTERÍA --- */
+.estanteria {
+  display: flex;
+  justify-content: center;
+  padding: 50px;
+  perspective: 2000px; /* Crucial para el efecto 3D */
+  gap: 10px;
+  min-height: 100vh;
+}
+
+.juego-container {
+  width: var(--ancho-lomo);
+  height: var(--alto-juego);
+  position: relative;
+  transition: all var(--vel-espacio) ease-in-out;
+  cursor: pointer;
+}
+
+.juego-container.espacio-abierto {
+  width: var(--ancho-tapa);
+  margin: 0 15px;
+}
+
+.juego {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform var(--vel-giro) cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: left center;
+}
+
+.juego-container.girado .juego {
+  /* Movemos el juego hacia el frente y lo rotamos */
+  transform: translateZ(160px) rotateY(-90deg) translateX(calc(var(--ancho-lomo) * -1));
+}
+
+/* --- LOMO --- */
+.lomo {
+  position: absolute;
+  width: var(--ancho-lomo);
+  height: 100%;
+  z-index: 2;
+  backface-visibility: hidden;
+  box-shadow: inset -1px 0 3px rgba(0,0,0,0.2);
+  overflow: hidden; /* Mantiene el contenido dentro */
+}
+
+.lomo-contenido {
+  /* El contenedor mide el ALTO del juego pero se rota */
+  width: var(--alto-juego);
+  height: var(--ancho-lomo);
+  
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  
+  /* Centrado y rotación de 90 grados */
+  transform: translate(-50%, -50%) rotate(90deg);
+  
+  display: flex;
+  align-items: center;
+
+  padding: 0 20px;
+  white-space: nowrap;
+  transition: opacity 0.3s;
+}
+
+.juego-container.girado .lomo-contenido {
+  opacity: 0;
+}
+
+.lomo-titulo {
+  color: white;
+  font-family: 'Arial', sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+  text-transform: uppercase;
+  margin: 0;
+  padding-left: 10px;
+}
+
+/* --- LOGOS Y VARIANTES --- */
+.lomo-plataforma-icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+}
+
+.icon-svg {
+  width: 22px;
+  height: 22px;
+  background-color: white;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.icon-svg.logo-s2 {  /* Tamaño del logo */
+  height: 40px;  
+  width: 32px;
+  padding-left: 1px;
+}
+
+/* Ajuste para que el icono rojo no flote sobre el texto */
+.es-variante-roja .lomo-plataforma-icono {
+  background-color: #e60012;
+  height: var(--ancho-lomo); /* 32px */
+  width: 52px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Aseguramos que se mantenga al inicio del contenedor flex */
+  flex-shrink: 0; 
+}
+
+/* --- TAPA --- */
+.tapa {
+  position: absolute;
+  width: var(--ancho-tapa);
+  height: 100%;
+  left: var(--ancho-lomo);
+  transform: rotateY(90deg);
+  transform-origin: left;
+  backface-visibility: hidden;
+}
+
+.tapa img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  box-shadow: 15px 0 35px rgba(0,0,0,0.6);
+  border-radius: 0 4px 4px 0;
+}
+
+/* Ajuste de logos (Máscaras) */
+.logo-s1 { -webkit-mask-image: url('/switch.svg'); mask-image: url('/switch.svg'); transform: rotate(-90deg); }
+.logo-s2 { -webkit-mask-image: url('/switch2.svg'); mask-image: url('/switch2.svg'); transform: rotate(-90deg); }

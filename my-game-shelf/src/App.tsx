@@ -10,26 +10,26 @@ const App: React.FC = () => {
 
   const juegos = [
     {
-      titulo: "The Legend of Zelda Breath of the Wild",
+      titulo: "The Legend of Zelda Breath of the Wildadasdadadadad",
       imagen: "/zelda.jpg",
-      color: "#e60012",
-      logo: "logo-s1",
       platform: "switch",
+      genres: ["aventura", "acción", "mundo abierto"],
+            finished: true
     },
     {
       titulo: "Metroid Prime 4",
       imagen: "./metroid4.jpg",
-      color: "#000",
-      logo: "logo-s2",
       roja: true,
       platform: "switch2",
+      genres: ["aventura", "acción", "FPS"],
+            finished: true
     },
     {
       titulo: "Super Mario Wonder",
       imagen: "/mario.jpg",
-      color: "#e60012",
-      logo: "logo-s1",
       platform: "switch",
+      genres: ["plataformas", "aventura"],
+      finished: true
     },
   ];
 

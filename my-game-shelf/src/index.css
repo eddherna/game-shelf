@@ -351,10 +351,14 @@ body, html {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 90%;
   font-family: 'Arial', sans-serif;
   text-transform: uppercase;
   line-height: 1.2;
   user-select: none;
+  text-align: center;
 }
 .ns-idle-n {
   font-size: 9px;
@@ -374,6 +378,23 @@ body, html {
   color: #e60012;
   line-height: 0.9;
   text-shadow: 0 0 20px rgba(230,0,18,0.5);
+}
+
+/* Estado con juego seleccionado: título largo en múltiples líneas */
+.ns-idle-logo--game {
+  gap: 6px;
+}
+
+.ns-idle-title {
+  display: block;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  letter-spacing: 1.5px;
+  font-size: 16px;
+  line-height: 1.25;
+  color: rgba(255,255,255,0.9);
 }
 
 /* ================================================

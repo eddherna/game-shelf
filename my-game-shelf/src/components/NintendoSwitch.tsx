@@ -27,7 +27,12 @@ const NintendoSwitch: React.FC<NintendoSwitchProps> = ({ juego }) => {
         <div className="ns-body">
           <div className="ns-screen">
             {juego ? (
-              <img src={juego.imagen} alt={juego.titulo} className="ns-screen-img" />
+              <div className="ns-screen-idle">
+                <div className="ns-idle-logo ns-idle-logo--game">
+                  <span className="ns-idle-n ns-idle-title">{juego.titulo}</span>
+
+                </div>
+              </div>
             ) : (
               <div className="ns-screen-idle">
                 <div className="ns-idle-logo">
@@ -36,7 +41,7 @@ const NintendoSwitch: React.FC<NintendoSwitchProps> = ({ juego }) => {
                   <span className="ns-idle-2">2</span>
                 </div>
               </div>
-            )}
+            ) }
           </div>
         </div>
 
@@ -52,11 +57,6 @@ const NintendoSwitch: React.FC<NintendoSwitchProps> = ({ juego }) => {
           {/* Stick abajo */}
           <div className="ns-stick ns-stick-right"></div>
         </div>
-
-      </div>
-
-      <div className={`ns-game-info ${juego ? 'ns-game-info--visible' : ''}`}>
-        {juego && <p className="ns-game-titulo">{juego.titulo}</p>}
       </div>
     </div>
   );

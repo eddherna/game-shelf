@@ -1,0 +1,2 @@
+/*O_o*/
+google.visualization.Query.setResponse({"version":"0.6","reqId":"0","status":"ok","sig":"2111365825","table":{"cols":[{"id":"A","label":"title","type":"string"},{"id":"B","label":"image","type":"string"},{"id":"C","label":"platform","type":"string"},{"id":"D","label":"genres","type":"string"},{"id":"E","label":"finished","type":"boolean"}],"rows":[{"c":[{"v":"Mario"},{"v":"asdsd"},{"v":"switch"},{"v":"platform,adventure"},{"v":true,"f":"TRUE"}]}],"parsedNumHeaders":1}});

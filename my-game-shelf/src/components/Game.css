@@ -1,0 +1,148 @@
+/* src/components/Game.css */
+
+:root {
+  --game-height: 420px;
+  --cover-width: 240px;
+  --spine-width: 32px;
+  --space-speed: 0.4s;
+  --rotate-speed: 0.5s;
+}
+
+.game-container {
+  width: var(--spine-width);
+  height: var(--game-height);
+  position: relative;
+  transition: all var(--space-speed) ease-in-out;
+  cursor: pointer;
+}
+
+.game-container.open-space {
+  width: var(--cover-width);
+  margin: 0 15px;
+}
+
+.game-card {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform var(--rotate-speed) cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: left center;
+}
+
+.game-container.rotated .game-card {
+  transform: translateZ(160px) rotateY(-90deg) translateX(calc(var(--spine-width) * -1));
+}
+
+.spine {
+  position: absolute;
+  width: var(--spine-width);
+  height: 100%;
+  z-index: 2;
+  backface-visibility: hidden;
+  box-shadow: inset -1px 0 3px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.spine-content {
+  width: var(--game-height);
+  height: var(--spine-width);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(90deg);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 20px;
+  overflow: hidden;
+  transition: opacity 0.3s;
+}
+
+.game-container.rotated .spine-content {
+  opacity: 0;
+}
+
+.spine-title {
+  color: white;
+  font-family: Arial, sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+  text-transform: uppercase;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spine-platform-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  flex-shrink: 0;
+}
+
+.spine-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.icon-svg {
+  width: 22px;
+  height: 22px;
+  background-color: white;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.icon-svg.logo-s2 {
+  height: 40px;
+  width: 32px;
+  padding-left: 1px;
+}
+
+.red-variant .spine-platform-icon {
+  background-color: #e60012;
+  height: var(--spine-width);
+  width: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cover {
+  position: absolute;
+  width: var(--cover-width);
+  height: 100%;
+  left: var(--spine-width);
+  transform: rotateY(90deg);
+  transform-origin: left;
+  backface-visibility: hidden;
+}
+
+.cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  box-shadow: 15px 0 35px rgba(0, 0, 0, 0.6);
+  border-radius: 0 4px 4px 0;
+}
+
+.logo-s1 {
+  -webkit-mask-image: url('/switch.svg');
+  mask-image: url('/switch.svg');
+  transform: rotate(-90deg);
+}
+
+.logo-s2 {
+  -webkit-mask-image: url('/switch2.svg');
+  mask-image: url('/switch2.svg');
+  transform: rotate(-90deg);
+}

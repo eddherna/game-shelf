@@ -1,20 +1,21 @@
 // src/components/NintendoSwitch.tsx
 import React from 'react';
+import './NintendoSwitch.css';
 
 interface NintendoSwitchProps {
-  juego: { titulo: string; imagen: string } | null;
+  game: { title: string; image: string } | null;
 }
 
-const NintendoSwitch: React.FC<NintendoSwitchProps> = ({ juego }) => {
+const NintendoSwitch: React.FC<NintendoSwitchProps> = ({ game }) => {
   return (
     <div className="ns-panel">
       <div className="ns-console">
 
         {/* ── Left Joy-Con 2 ── */}
         <div className="ns-joycon ns-joycon-left">
-          {/* Stick arriba */}
+          {/* Top stick */}
           <div className="ns-stick ns-stick-left"></div>
-          {/* D-pad: 4 botones independientes con flechas (sentido horario) */}
+          {/* D-pad: 4 independent buttons with arrows (clockwise) */}
           <div className="ns-dpad">
             <div className="ns-dpad-btn ns-dpad-up">▲</div>
             <div className="ns-dpad-btn ns-dpad-right">►</div>
@@ -26,10 +27,10 @@ const NintendoSwitch: React.FC<NintendoSwitchProps> = ({ juego }) => {
         {/* ── Body ── */}
         <div className="ns-body">
           <div className="ns-screen">
-            {juego ? (
+            {game ? (
               <div className="ns-screen-idle">
                 <div className="ns-idle-logo ns-idle-logo--game">
-                  <span className="ns-idle-n ns-idle-title">{juego.titulo}</span>
+                  <span className="ns-idle-n ns-idle-title">{game.title}</span>
 
                 </div>
               </div>
@@ -54,7 +55,7 @@ const NintendoSwitch: React.FC<NintendoSwitchProps> = ({ juego }) => {
             <div className="ns-btn-abxy ns-btn-b">B</div>
             <div className="ns-btn-abxy ns-btn-y">Y</div>
           </div>
-          {/* Stick abajo */}
+          {/* Bottom stick */}
           <div className="ns-stick ns-stick-right"></div>
         </div>
       </div>

@@ -1,0 +1,253 @@
+/* src/components/NintendoSwitch.css */
+
+.ns-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  flex-shrink: 0;
+}
+
+.ns-console {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  border-radius: 50px;
+  box-shadow:
+    0 0 0 1px #3a3a3a,
+    0 20px 60px rgba(0,0,0,0.9),
+    0 4px 16px rgba(0,0,0,0.6);
+  position: relative;
+  background: #1c1c1c;
+  overflow: hidden;
+}
+
+.ns-joycon {
+  width: 80px;
+  height: 220px;
+  position: relative;
+  z-index: 1;
+}
+
+.ns-joycon-left {
+  background: #222222;
+  border-radius: 50px 0px 0px 50px;
+}
+
+.ns-joycon-right {
+  background: #222222;
+  border-radius: 0px 50px 50px 0px;
+}
+
+.ns-stick {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 34%, #505050, #141414);
+  border: 2px solid #0a0a0a;
+  box-shadow:
+    inset 0 2px 6px rgba(255,255,255,0.08),
+    0 3px 10px rgba(0,0,0,0.8);
+  position: absolute;
+}
+
+.ns-stick-left  { top: 48px; left: 50%; transform: translateX(-50%); border-color: #0ce4ff; }
+.ns-stick-right { top: 63%; left: 50%; transform: translateX(-50%); border-color: #ff876d}
+
+.ns-dpad {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 58px;
+  height: 58px;
+}
+
+.ns-dpad-btn {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  color:#3a3a3a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: rgb(74 61 61 / 70%);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.7), inset 0 1px 2px rgba(255,255,255,0.05);
+}
+
+.ns-dpad-up {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.ns-dpad-down {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.ns-dpad-left {
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.ns-dpad-right {
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.ns-abxy {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -120%);
+  width: 58px;
+  height: 58px;
+}
+
+.ns-btn-abxy {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 900;
+  font-family: Arial, sans-serif;
+  color: rgba(249, 237, 237, 0.7);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.7), inset 0 1px 2px rgba(255,255,255,0.05);
+}
+
+.ns-btn-x { background: #1a1a1a; top: 0; left: 20px; border: 1px solid #3a3a3a; }
+.ns-btn-a { background: #1a1a1a; top: 20px; right: 0; border: 1px solid #3a3a3a; }
+.ns-btn-b { background: #1a1a1a; bottom: 0; left: 20px; border: 1px solid #3a3a3a; }
+.ns-btn-y { background: #1a1a1a; top: 20px; left: 0; border: 1px solid #3a3a3a; }
+
+.ns-body {
+  width: 400px;
+  height: 220px;
+  background: #1c1c1c;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  position: relative;
+  z-index: 0;
+}
+
+.ns-screen {
+  width: 380px;
+  height: 196px;
+  background: #000;
+  overflow: hidden;
+  border-radius: 4px;
+  border: 2px solid #111;
+  box-shadow:
+    0 0 0 1px #2a2a2a,
+    inset 0 0 20px rgba(0,0,0,0.98);
+  flex-shrink: 0;
+}
+
+.ns-screen-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ns-screen-idle {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #030303;
+}
+
+.ns-idle-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 90%;
+  font-family: 'Arial', sans-serif;
+  text-transform: uppercase;
+  line-height: 1.2;
+  user-select: none;
+  text-align: center;
+}
+
+.ns-idle-n {
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 4px;
+}
+
+.ns-idle-s {
+  font-size: 15px;
+  font-weight: 900;
+  color: rgba(255,255,255,0.9);
+  letter-spacing: 2.5px;
+}
+
+.ns-idle-2 {
+  font-size: 32px;
+  font-weight: 900;
+  color: #e60012;
+  line-height: 0.9;
+  text-shadow: 0 0 20px rgba(230,0,18,0.5);
+}
+
+.ns-idle-logo--game {
+  gap: 6px;
+}
+
+.ns-idle-title {
+  display: block;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  letter-spacing: 1.5px;
+  font-size: 16px;
+  line-height: 1.25;
+  color: rgba(255,255,255,0.9);
+}
+
+.ns-game-info {
+  margin-top: 14px;
+  text-align: center;
+  max-width: 580px;
+  min-height: 30px;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.ns-game-info--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ns-game-title {
+  color: #aaaaaa;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  line-height: 1.5;
+  margin: 0;
+}

@@ -1,0 +1,103 @@
+/* src/components/Shelf.css */
+
+.shelf-scroll {
+  --shelf-side-padding: 50px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  width: 100%;
+  padding-bottom: 14px;
+  position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: #555 #1a1a1a;
+}
+
+.shelf-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.shelf-scroll::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.shelf-scroll::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+}
+
+.shelf-scroll::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+
+.shelf {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  width: max-content;
+  padding: 40px var(--shelf-side-padding) 22px;
+  perspective: 2000px;
+  gap: 10px;
+}
+
+.shelf-progress {
+  position: sticky;
+  left: var(--shelf-side-padding);
+  bottom: 0;
+  width: calc(100% - (var(--shelf-side-padding) * 2));
+  height: 18px;
+  background: #252525;
+  border-radius: 12px;
+  overflow: hidden;
+  touch-action: none;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.shelf-progress-thumb {
+  position: absolute;
+  top: 2px;
+  left: 0;
+  height: calc(100% - 4px);
+  background: linear-gradient(90deg, #8f8f8f 0%, #d1d1d1 100%);
+  border-radius: 10px;
+  transition: left 0.08s linear;
+  cursor: grab;
+  overflow: visible;
+}
+
+.shelf-progress-thumb::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 22px;
+  height: 4px;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(40, 40, 40, 0.6) 0,
+    rgba(40, 40, 40, 0.6) 3px,
+    rgba(110, 110, 110, 0.35) 3px,
+    rgba(110, 110, 110, 0.35) 6px
+  );
+  pointer-events: none;
+}
+
+.shelf-progress-thumb:active {
+  cursor: grabbing;
+}
+
+@media (max-width: 768px) {
+  .shelf-scroll {
+    --shelf-side-padding: 20px;
+    padding-bottom: 20px;
+  }
+
+  .shelf-progress {
+    height: 22px;
+  }
+
+  .shelf-progress-thumb {
+    top: 2px;
+    height: calc(100% - 4px);
+  }
+}

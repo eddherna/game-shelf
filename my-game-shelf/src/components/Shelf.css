@@ -1,12 +1,13 @@
 /* src/components/Shelf.css */
 
 .shelf-scroll {
-  --shelf-side-padding: 50px;
+  --shelf-side-padding: clamp(16px, 4vw, 50px);
   overflow-x: auto;
   overflow-y: hidden;
   width: 100%;
   padding-bottom: 14px;
   position: relative;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: #555 #1a1a1a;
 }
@@ -33,9 +34,9 @@
   flex-direction: row;
   flex-wrap: nowrap;
   width: max-content;
-  padding: 40px var(--shelf-side-padding) 22px;
+  padding: clamp(14px, 3vw, 40px) var(--shelf-side-padding) 22px;
   perspective: 2000px;
-  gap: 10px;
+  gap: clamp(6px, 1.5vw, 10px);
 }
 
 .shelf-progress {
@@ -88,7 +89,7 @@
 
 @media (max-width: 768px) {
   .shelf-scroll {
-    --shelf-side-padding: 20px;
+    --shelf-side-padding: 14px;
     padding-bottom: 20px;
   }
 

@@ -1,11 +1,23 @@
 /* src/components/NintendoSwitch.css */
 
 .ns-panel {
+  --ns-joycon-width: 80px;
+  --ns-joycon-height: 220px;
+  --ns-body-width: 400px;
+  --ns-body-height: 220px;
+  --ns-screen-width: 380px;
+  --ns-screen-height: 196px;
+  --ns-stick-size: 38px;
+  --ns-dpad-size: 58px;
+  --ns-button-size: 18px;
+  --ns-abxy-size: 58px;
+  --ns-gap-step: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 30px 20px;
+  width: 100%;
+  padding: clamp(10px, 3vw, 30px) clamp(8px, 2.5vw, 20px);
   flex-shrink: 0;
 }
 
@@ -24,8 +36,8 @@
 }
 
 .ns-joycon {
-  width: 80px;
-  height: 220px;
+  width: var(--ns-joycon-width);
+  height: var(--ns-joycon-height);
   position: relative;
   z-index: 1;
 }
@@ -41,8 +53,8 @@
 }
 
 .ns-stick {
-  width: 38px;
-  height: 38px;
+  width: var(--ns-stick-size);
+  height: var(--ns-stick-size);
   border-radius: 50%;
   background: radial-gradient(circle at 36% 34%, #505050, #141414);
   border: 2px solid #0a0a0a;
@@ -53,21 +65,21 @@
 }
 
 .ns-stick-left  { top: 48px; left: 50%; transform: translateX(-50%); border-color: #0ce4ff; }
-.ns-stick-right { top: 63%; left: 50%; transform: translateX(-50%); border-color: #ff876d}
+.ns-stick-right { top: 56%; left: 50%; transform: translateX(-50%); border-color: #ff876d}
 
 .ns-dpad {
   position: absolute;
-  bottom: 30px;
+  bottom: 50px;
   left: 50%;
   transform: translateX(-50%);
-  width: 58px;
-  height: 58px;
-}
+  width: var(--ns-dpad-size);
+  height: var(--ns-dpad-size);
+} 
 
 .ns-dpad-btn {
   position: absolute;
-  width: 18px;
-  height: 18px;
+  width: var(--ns-button-size);
+  height: var(--ns-button-size);
   border-radius: 50%;
   background: #1a1a1a;
   border: 1px solid #3a3a3a;
@@ -109,13 +121,13 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -120%);
-  width: 58px;
-  height: 58px;
+  width: var(--ns-abxy-size);
+  height: var(--ns-abxy-size);
 }
 
 .ns-btn-abxy {
-  width: 18px;
-  height: 18px;
+  width: var(--ns-button-size);
+  height: var(--ns-button-size);
   border-radius: 50%;
   position: absolute;
   display: flex;
@@ -128,14 +140,14 @@
   box-shadow: 0 2px 5px rgba(0,0,0,0.7), inset 0 1px 2px rgba(255,255,255,0.05);
 }
 
-.ns-btn-x { background: #1a1a1a; top: 0; left: 20px; border: 1px solid #3a3a3a; }
-.ns-btn-a { background: #1a1a1a; top: 20px; right: 0; border: 1px solid #3a3a3a; }
-.ns-btn-b { background: #1a1a1a; bottom: 0; left: 20px; border: 1px solid #3a3a3a; }
-.ns-btn-y { background: #1a1a1a; top: 20px; left: 0; border: 1px solid #3a3a3a; }
+.ns-btn-x { background: #1a1a1a; top: 0; left: var(--ns-gap-step); border: 1px solid #3a3a3a; }
+.ns-btn-a { background: #1a1a1a; top: var(--ns-gap-step); right: 0; border: 1px solid #3a3a3a; }
+.ns-btn-b { background: #1a1a1a; bottom: 0; left: var(--ns-gap-step); border: 1px solid #3a3a3a; }
+.ns-btn-y { background: #1a1a1a; top: var(--ns-gap-step); left: 0; border: 1px solid #3a3a3a; }
 
 .ns-body {
-  width: 400px;
-  height: 220px;
+  width: var(--ns-body-width);
+  height: var(--ns-body-height);
   background: #1c1c1c;
   display: flex;
   flex-direction: column;
@@ -147,8 +159,8 @@
 }
 
 .ns-screen {
-  width: 380px;
-  height: 196px;
+  width: var(--ns-screen-width);
+  height: var(--ns-screen-height);
   background: #000;
   overflow: hidden;
   border-radius: 4px;
@@ -250,4 +262,118 @@
   letter-spacing: 1.5px;
   line-height: 1.5;
   margin: 0;
+}
+
+@media (max-width: 1100px) {
+  .ns-panel {
+    --ns-joycon-width: 68px;
+    --ns-joycon-height: 190px;
+    --ns-body-width: 340px;
+    --ns-body-height: 190px;
+    --ns-screen-width: 322px;
+    --ns-screen-height: 170px;
+    --ns-stick-size: 32px;
+    --ns-dpad-size: 50px;
+    --ns-button-size: 16px;
+    --ns-abxy-size: 50px;
+    --ns-gap-step: 17px;
+  }
+
+  .ns-idle-title {
+    font-size: 14px;
+    letter-spacing: 1.1px;
+  }
+}
+
+@media (max-width: 768px) {
+  .ns-panel {
+    --ns-joycon-width: 52px;
+    --ns-joycon-height: 160px;
+    --ns-body-width: 260px;
+    --ns-body-height: 160px;
+    --ns-screen-width: 244px;
+    --ns-screen-height: 142px;
+    --ns-stick-size: 24px;
+    --ns-dpad-size: 42px;
+    --ns-button-size: 13px;
+    --ns-abxy-size: 42px;
+    --ns-gap-step: 14px;
+  }
+
+  .ns-console {
+    border-radius: 34px;
+  }
+
+  .ns-joycon-left {
+    border-radius: 34px 0 0 34px;
+  }
+
+  .ns-joycon-right {
+    border-radius: 0 34px 34px 0;
+  }
+
+  .ns-dpad {
+    bottom: 22px;
+  }
+
+  .ns-idle-n {
+    font-size: 8px;
+    letter-spacing: 2.4px;
+  }
+
+  .ns-idle-s {
+    font-size: 12px;
+    letter-spacing: 1.8px;
+  }
+
+  .ns-idle-2 {
+    font-size: 24px;
+  }
+
+  .ns-idle-title {
+    font-size: 12px;
+    letter-spacing: 0.8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ns-panel {
+    --ns-joycon-width: 42px;
+    --ns-joycon-height: 126px;
+    --ns-body-width: 210px;
+    --ns-body-height: 126px;
+    --ns-screen-width: 198px;
+    --ns-screen-height: 110px;
+    --ns-stick-size: 18px;
+    --ns-dpad-size: 32px;
+    --ns-button-size: 10px;
+    --ns-abxy-size: 32px;
+    --ns-gap-step: 11px;
+  }
+
+  .ns-console {
+    border-radius: 26px;
+  }
+
+  .ns-joycon-left {
+    border-radius: 26px 0 0 26px;
+  }
+
+  .ns-joycon-right {
+    border-radius: 0 26px 26px 0;
+  }
+
+  .ns-dpad {
+    bottom: 16px;
+  }
+
+  .ns-dpad-btn,
+  .ns-btn-abxy {
+    font-size: 7px;
+  }
+
+  .ns-idle-title {
+    font-size: 10px;
+    letter-spacing: 0.5px;
+  }
 }

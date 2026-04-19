@@ -61,7 +61,11 @@ const Game = memo(({ title, image, platform, isOpen, onToggle }: GameProps) => {
         >
           <div className="spine-content">
             <div className="spine-platform-icon">
-              <div className={`icon-svg ${platformStyles.get(platform)?.logo}`}></div>
+              <div className="icon-svg logo-s1"></div>
+              {platform === "switch2"
+                ? <div className="spine-platform-badge"></div>
+                : <div className="spine-platform-spacer"></div>
+              }
             </div>
             <div className="spine-text">
               <h1 className="spine-title">{title}</h1>

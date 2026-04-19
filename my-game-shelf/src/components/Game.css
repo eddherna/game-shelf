@@ -45,6 +45,7 @@
 }
 
 .spine-content {
+  box-sizing: content-box;
   width: var(--game-height);
   height: var(--spine-width);
   position: absolute;
@@ -53,8 +54,9 @@
   transform: translate(-50%, -50%) rotate(90deg);
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 0 20px;
+  padding: 0px 20px 0 20px;
   overflow: hidden;
   transition: opacity 0.3s;
 }
@@ -81,17 +83,42 @@
   justify-content: center;
   width: 52px;
   flex-shrink: 0;
+  gap: 3px;
+}
+
+.spine-platform-badge {
+  background-color: white;
+  -webkit-mask-image: url('/2.svg');
+  mask-image: url('/2.svg');
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+  width: 13px;
+  height: 18px;
+  flex-shrink: 0;
+  transform: rotate(-90deg);
+}
+
+.spine-platform-spacer {
+  width: 13px;
+  height: 18px;
+  flex-shrink: 0;
+  visibility: hidden;
 }
 
 .spine-text {
   flex: 1;
   min-width: 0;
   overflow: hidden;
+  padding-left: 5px;
 }
 
 .icon-svg {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   background-color: white;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
@@ -115,6 +142,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  gap: 3px;
 }
 
 .cover {

@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import "./App.css";
 import NintendoSwitch from "./components/NintendoSwitch";
 import Shelf from "./components/Shelf";
-import MiComponente from "./components/MyComponent";
 
 interface GameItem {
   title: string;
@@ -389,10 +388,11 @@ const App: React.FC = () => {
     { title: "Sociable Soccer 24", image: "/mario.jpg", platform: "switch2", genres: ["sports"], finished: false },
   ];
 
+  const openGameData = games.find((game) => game.title === openGame) ?? null;
+
   return (
     <div className="app">
-      <MiComponente />
-      <NintendoSwitch game={games.find((game) => game.title === openGame) ?? null} />
+      <NintendoSwitch game={openGameData} />
       <Shelf
         games={games}
         openGame={openGame}

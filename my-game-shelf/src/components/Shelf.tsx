@@ -11,12 +11,17 @@ interface GameItem {
 interface ShelfProps {
   games: GameItem[];
   openGame: string | null;
-  onToggleGame: (title: string) => void;
+  onSetOpenGame: (title: string | null) => void;
 }
 
-const Shelf = ({ games, openGame, onToggleGame }: ShelfProps) => {
+const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
+  const gameRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const pendingOpenTitleRef = useRef<string | null>(null);
+  const pendingOpenSettleTimeoutRef = useRef<number | null>(null);
+  const pendingOpenFallbackTimeoutRef = useRef<number | null>(null);
+  const pendingCloseThenOpenTimeoutRef = useRef<number | null>(null);
   const draggingRef = useRef(false);
   const dragOffsetRef = useRef(0);
   const [thumbWidth, setThumbWidth] = useState(0);
@@ -45,6 +50,26 @@ const Shelf = ({ games, openGame, onToggleGame }: ShelfProps) => {
 
     setThumbWidth(nextThumbWidth);
     setThumbOffset(nextThumbOffset);
+
+    if (pendingOpenTitleRef.current) {
+      if (pendingOpenSettleTimeoutRef.current !== null) {
+        window.clearTimeout(pendingOpenSettleTimeoutRef.current);
+      }
+
+      pendingOpenSettleTimeoutRef.current = window.setTimeout(() => {
+        const pendingTitle = pendingOpenTitleRef.current;
+        pendingOpenTitleRef.current = null;
+
+        if (pendingOpenFallbackTimeoutRef.current !== null) {
+          window.clearTimeout(pendingOpenFallbackTimeoutRef.current);
+          pendingOpenFallbackTimeoutRef.current = null;
+        }
+
+        if (pendingTitle) {
+          onSetOpenGame(pendingTitle);
+        }
+      }, 140);
+    }
   };
 
   const scrollToRatio = (ratio: number) => {
@@ -60,6 +85,135 @@ const Shelf = ({ games, openGame, onToggleGame }: ShelfProps) => {
     }
 
     element.scrollLeft = clamp(ratio, 0, 1) * maxScroll;
+  };
+
+  const clearPendingOpen = () => {
+    pendingOpenTitleRef.current = null;
+
+    if (pendingOpenSettleTimeoutRef.current !== null) {
+      window.clearTimeout(pendingOpenSettleTimeoutRef.current);
+      pendingOpenSettleTimeoutRef.current = null;
+    }
+
+    if (pendingOpenFallbackTimeoutRef.current !== null) {
+      window.clearTimeout(pendingOpenFallbackTimeoutRef.current);
+      pendingOpenFallbackTimeoutRef.current = null;
+    }
+
+    if (pendingCloseThenOpenTimeoutRef.current !== null) {
+      window.clearTimeout(pendingCloseThenOpenTimeoutRef.current);
+      pendingCloseThenOpenTimeoutRef.current = null;
+    }
+  };
+
+  const openCoverWouldOverflowViewport = (gameIndex: number) => {
+    const container = scrollRef.current;
+    const gameElement = gameRefs.current[gameIndex];
+    if (!container || !gameElement) {
+      return false;
+    }
+
+    const containerRect = container.getBoundingClientRect();
+    const gameRect = gameElement.getBoundingClientRect();
+    const estimatedCoverWidth = 365;
+    const horizontalPadding = 20;
+
+    const projectedRight = gameRect.left + estimatedCoverWidth + horizontalPadding;
+    const projectedLeft = gameRect.left - horizontalPadding;
+
+    return projectedRight > containerRect.right || projectedLeft < containerRect.left;
+  };
+
+  const centerGame = (gameIndex: number) => {
+    const container = scrollRef.current;
+    const gameElement = gameRefs.current[gameIndex];
+    if (!container || !gameElement) {
+      return 0;
+    }
+
+    const maxScroll = container.scrollWidth - container.clientWidth;
+    if (maxScroll <= 0) {
+      return 0;
+    }
+
+    const gameCenter = gameElement.offsetLeft + gameElement.offsetWidth / 2;
+    const viewportCenter = container.clientWidth / 2;
+    const targetScrollLeft = clamp(gameCenter - viewportCenter, 0, maxScroll);
+    const distance = Math.abs(targetScrollLeft - container.scrollLeft);
+
+    if (distance < 1) {
+      return 0;
+    }
+
+    container.scrollTo({ left: targetScrollLeft, behavior: "smooth" });
+    return distance;
+  };
+
+  const openWithOptionalCentering = (title: string, gameIndex: number) => {
+    if (!openCoverWouldOverflowViewport(gameIndex)) {
+      onSetOpenGame(title);
+      return;
+    }
+
+    const scrolledDistance = centerGame(gameIndex);
+    if (scrolledDistance <= 0) {
+      onSetOpenGame(title);
+      return;
+    }
+
+    pendingOpenTitleRef.current = title;
+
+    if (pendingOpenSettleTimeoutRef.current !== null) {
+      window.clearTimeout(pendingOpenSettleTimeoutRef.current);
+    }
+
+    pendingOpenSettleTimeoutRef.current = window.setTimeout(() => {
+      const pendingTitle = pendingOpenTitleRef.current;
+      pendingOpenTitleRef.current = null;
+
+      if (pendingOpenFallbackTimeoutRef.current !== null) {
+        window.clearTimeout(pendingOpenFallbackTimeoutRef.current);
+        pendingOpenFallbackTimeoutRef.current = null;
+      }
+
+      if (pendingTitle) {
+        onSetOpenGame(pendingTitle);
+      }
+    }, 140);
+
+    pendingOpenFallbackTimeoutRef.current = window.setTimeout(() => {
+      const pendingTitle = pendingOpenTitleRef.current;
+      pendingOpenTitleRef.current = null;
+
+      if (pendingOpenSettleTimeoutRef.current !== null) {
+        window.clearTimeout(pendingOpenSettleTimeoutRef.current);
+        pendingOpenSettleTimeoutRef.current = null;
+      }
+
+      if (pendingTitle) {
+        onSetOpenGame(pendingTitle);
+      }
+    }, 900);
+  };
+
+  const handleGameToggle = (title: string, gameIndex: number) => {
+    clearPendingOpen();
+
+    if (openGame === title) {
+      onSetOpenGame(null);
+      return;
+    }
+
+    if (openGame && openGame !== title) {
+      onSetOpenGame(null);
+      pendingCloseThenOpenTimeoutRef.current = window.setTimeout(() => {
+        openWithOptionalCentering(title, gameIndex);
+        pendingCloseThenOpenTimeoutRef.current = null;
+      }, 560);
+      return;
+    }
+
+    openWithOptionalCentering(title, gameIndex);
   };
 
   useEffect(() => {
@@ -107,6 +261,12 @@ const Shelf = ({ games, openGame, onToggleGame }: ShelfProps) => {
     };
   }, [thumbWidth]);
 
+  useEffect(() => {
+    return () => {
+      clearPendingOpen();
+    };
+  }, []);
+
   return (
     <div
       ref={scrollRef}
@@ -114,14 +274,17 @@ const Shelf = ({ games, openGame, onToggleGame }: ShelfProps) => {
       onScroll={syncFromScroll}
     >
       <div className="shelf">
-        {games.map((game) => (
+        {games.map((game, index) => (
           <Game
             key={game.title}
+            containerRef={(element) => {
+              gameRefs.current[index] = element;
+            }}
             title={game.title}
             image={game.image}
             platform={game.platform}
             isOpen={openGame === game.title}
-            onToggle={() => onToggleGame(game.title)}
+            onToggle={() => handleGameToggle(game.title, index)}
           />
         ))}
       </div>

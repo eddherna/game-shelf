@@ -7,6 +7,7 @@ interface GameProps {
   platform: string;
   isOpen: boolean;
   onToggle: () => void;
+  containerRef?: (element: HTMLDivElement | null) => void;
 }
 
 interface PlatformInfo {
@@ -19,7 +20,7 @@ const platformStyles: Map<string, PlatformInfo> = new Map<string, PlatformInfo>(
   ["switch2", { color: "#000", logo: "logo-s2" }],
 ]);
 
-const Game = memo(({ title, image, platform, isOpen, onToggle }: GameProps) => {
+const Game = memo(({ title, image, platform, isOpen, onToggle, containerRef }: GameProps) => {
   const [isSpaced, setIsSpaced] = useState(false);
   const [canRotate, setCanRotate] = useState(false);
   const [zIndex, setZIndex] = useState(1);
@@ -36,9 +37,9 @@ const Game = memo(({ title, image, platform, isOpen, onToggle }: GameProps) => {
       }, 400);
     } else {
       setCanRotate(false);
+      setZIndex(1);
       spacingTimer = setTimeout(() => {
         setIsSpaced(false);
-        rotationTimer = setTimeout(() => setZIndex(1), 400);
       }, 500);
     }
 
@@ -50,14 +51,34 @@ const Game = memo(({ title, image, platform, isOpen, onToggle }: GameProps) => {
 
   return (
     <div
+      ref={containerRef}
       className={`game-container ${isSpaced ? "open-space" : ""} ${canRotate ? "rotated" : ""}`}
-      onClick={onToggle}
+      onClick={() => {
+        if (!isOpen) {
+          onToggle();
+        }
+      }}
       style={{ zIndex }}
     >
+      {isOpen && canRotate && (
+        <div
+          className="open-cover-close-zone"
+          onClick={(event) => {
+            event.stopPropagation();
+            onToggle();
+          }}
+        />
+      )}
       <div className="game-card">
         <div
           className={`spine ${platform === "switch2" ? "red-variant" : ""}`}
           style={{ backgroundColor: platformStyles.get(platform)?.color }}
+          onClick={(event) => {
+            if (isOpen) {
+              event.stopPropagation();
+              onToggle();
+            }
+          }}
         >
           <div className="spine-content">
             <div className="spine-platform-icon">

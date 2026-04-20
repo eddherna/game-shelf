@@ -1,7 +1,6 @@
 // src/App.tsx
 import React, { useState } from "react";
 import "./App.css";
-import NintendoSwitch from "./components/NintendoSwitch";
 import Shelf from "./components/Shelf";
 
 interface GameItem {
@@ -388,21 +387,12 @@ const App: React.FC = () => {
     { title: "Sociable Soccer 24", image: "/mario.jpg", platform: "switch2", genres: ["sports"], finished: false },
   ];
 
-  const openGameData = games.find((game) => game.title === openGame) ?? null;
-
   return (
     <div className="app">
-      <NintendoSwitch game={openGameData} />
       <Shelf
         games={games}
         openGame={openGame}
-        onToggleGame={(title) => {
-          if (openGame === title) {
-            setOpenGame(null);
-          } else {
-            setOpenGame(title);
-          }
-        }}
+        onSetOpenGame={setOpenGame}
       />
     </div>
   );

@@ -1,20 +1,13 @@
 // src/App.tsx
 import React, { useState } from "react";
 import "./App.css";
-import Shelf from "./components/Shelf";
-
-interface GameItem {
-  title: string;
-  image: string;
-  platform: string;
-  genres: string[];
-  finished: boolean;
-}
+import Shelf from "./components/Shelf/Shelf";
+import type GameInfo from "./models/GameInfo";
 
 const App: React.FC = () => {
-  const [openGame, setOpenGame] = useState<string | null>(null);
+  const [openGame, setOpenGame] = useState<number | null>(null);
 
-  const games: GameItem[] = [
+  const games: GameInfo[] = [
     { title: "The Legend of Zelda: Breath of the Wild", image: "/zelda.jpg", platform: "switch", genres: ["adventure", "action"], finished: true },
     { title: "Metroid Prime 4: Beyond", image: "/metroid4.jpg", platform: "switch2", genres: ["fps", "adventure"], finished: false },
     { title: "Super Mario Wonder", image: "/mario.jpg", platform: "switch", genres: ["platformer"], finished: true },
@@ -385,7 +378,7 @@ const App: React.FC = () => {
     { title: "Rocket League Sideswipe", image: "/mario.jpg", platform: "switch", genres: ["sports", "action"], finished: false },
     { title: "Windjammers 2", image: "/mario.jpg", platform: "switch", genres: ["sports", "action"], finished: false },
     { title: "Sociable Soccer 24", image: "/mario.jpg", platform: "switch2", genres: ["sports"], finished: false },
-  ];
+  ].map((game, index) => ({ ...game, id: index + 1 }));
 
   return (
     <div className="app">

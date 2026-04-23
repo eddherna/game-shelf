@@ -1,24 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import Game from "./Game";
+import Game from "../Game/Game";
 import "./Shelf.css";
-
-interface GameItem {
-  title: string;
-  image: string;
-  platform: string;
-}
+import type GameInfo from "../../models/GameInfo";
 
 interface ShelfProps {
-  games: GameItem[];
-  openGame: string | null;
-  onSetOpenGame: (title: string | null) => void;
+  games: GameInfo[];
+  openGame: number | null;
+  onSetOpenGame: (id: number | null) => void;
 }
 
 const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
   const gameRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const pendingOpenTitleRef = useRef<string | null>(null);
+  const pendingOpenIdRef = useRef<number | null>(null);
   const pendingOpenSettleTimeoutRef = useRef<number | null>(null);
   const pendingOpenFallbackTimeoutRef = useRef<number | null>(null);
   const pendingCloseThenOpenTimeoutRef = useRef<number | null>(null);
@@ -29,13 +24,10 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
 
   const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
-  const syncFromScroll = () => {
-    const element = scrollRef.current;
-    if (!element) {
-      return;
-    }
-
-    const { scrollLeft, scrollWidth, clientWidth } = element;
+  // --- Refactored Functions ---
+  
+  // Progress thumb update logic
+  const updateProgressThumb = (scrollLeft: number, scrollWidth: number, clientWidth: number) => {
     const maxScroll = scrollWidth - clientWidth;
 
     if (maxScroll <= 0) {
@@ -50,26 +42,41 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
 
     setThumbWidth(nextThumbWidth);
     setThumbOffset(nextThumbOffset);
+  };
 
-    if (pendingOpenTitleRef.current) {
+  // Pending open operations handling
+  const handlePendingOpenOperations = () => {
+    if (pendingOpenIdRef.current !== null) {
       if (pendingOpenSettleTimeoutRef.current !== null) {
         window.clearTimeout(pendingOpenSettleTimeoutRef.current);
       }
 
       pendingOpenSettleTimeoutRef.current = window.setTimeout(() => {
-        const pendingTitle = pendingOpenTitleRef.current;
-        pendingOpenTitleRef.current = null;
+        const pendingId = pendingOpenIdRef.current;
+        pendingOpenIdRef.current = null;
 
         if (pendingOpenFallbackTimeoutRef.current !== null) {
           window.clearTimeout(pendingOpenFallbackTimeoutRef.current);
           pendingOpenFallbackTimeoutRef.current = null;
         }
 
-        if (pendingTitle) {
-          onSetOpenGame(pendingTitle);
+        if (pendingId !== null) {
+          onSetOpenGame(pendingId);
         }
       }, 140);
     }
+  };
+
+  // Main scroll sync function
+  const syncFromScroll = () => {
+    const element = scrollRef.current;
+    if (!element) {
+      return;
+    }
+
+    const { scrollLeft, scrollWidth, clientWidth } = element;
+    updateProgressThumb(scrollLeft, scrollWidth, clientWidth);
+    handlePendingOpenOperations();
   };
 
   const scrollToRatio = (ratio: number) => {
@@ -87,8 +94,9 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
     element.scrollLeft = clamp(ratio, 0, 1) * maxScroll;
   };
 
+  // Refactored timeout clearing logic
   const clearPendingOpen = () => {
-    pendingOpenTitleRef.current = null;
+    pendingOpenIdRef.current = null;
 
     if (pendingOpenSettleTimeoutRef.current !== null) {
       window.clearTimeout(pendingOpenSettleTimeoutRef.current);
@@ -106,7 +114,8 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
     }
   };
 
-  const openCoverWouldOverflowViewport = (gameIndex: number) => {
+  // Overflow checking logic
+  const checkCoverOverflow = (gameIndex: number) => {
     const container = scrollRef.current;
     const gameElement = gameRefs.current[gameIndex];
     if (!container || !gameElement) {
@@ -124,7 +133,8 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
     return projectedRight > containerRect.right || projectedLeft < containerRect.left;
   };
 
-  const centerGame = (gameIndex: number) => {
+  // Centering logic
+  const centerGameIfNeeded = (gameIndex: number) => {
     const container = scrollRef.current;
     const gameElement = gameRefs.current[gameIndex];
     if (!container || !gameElement) {
@@ -149,71 +159,112 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
     return distance;
   };
 
-  const openWithOptionalCentering = (title: string, gameIndex: number) => {
-    if (!openCoverWouldOverflowViewport(gameIndex)) {
-      onSetOpenGame(title);
-      return;
-    }
-
-    const scrolledDistance = centerGame(gameIndex);
-    if (scrolledDistance <= 0) {
-      onSetOpenGame(title);
-      return;
-    }
-
-    pendingOpenTitleRef.current = title;
+  // Timeout setup for open operations
+  const setupPendingOpenTimeouts = (gameId: number) => {
+    pendingOpenIdRef.current = gameId;
 
     if (pendingOpenSettleTimeoutRef.current !== null) {
       window.clearTimeout(pendingOpenSettleTimeoutRef.current);
     }
 
     pendingOpenSettleTimeoutRef.current = window.setTimeout(() => {
-      const pendingTitle = pendingOpenTitleRef.current;
-      pendingOpenTitleRef.current = null;
+      const pendingId = pendingOpenIdRef.current;
+      pendingOpenIdRef.current = null;
 
       if (pendingOpenFallbackTimeoutRef.current !== null) {
         window.clearTimeout(pendingOpenFallbackTimeoutRef.current);
         pendingOpenFallbackTimeoutRef.current = null;
       }
 
-      if (pendingTitle) {
-        onSetOpenGame(pendingTitle);
+      if (pendingId !== null) {
+        onSetOpenGame(pendingId);
       }
     }, 140);
 
     pendingOpenFallbackTimeoutRef.current = window.setTimeout(() => {
-      const pendingTitle = pendingOpenTitleRef.current;
-      pendingOpenTitleRef.current = null;
+      const pendingId = pendingOpenIdRef.current;
+      pendingOpenIdRef.current = null;
 
       if (pendingOpenSettleTimeoutRef.current !== null) {
         window.clearTimeout(pendingOpenSettleTimeoutRef.current);
         pendingOpenSettleTimeoutRef.current = null;
       }
 
-      if (pendingTitle) {
-        onSetOpenGame(pendingTitle);
+      if (pendingId !== null) {
+        onSetOpenGame(pendingId);
       }
     }, 900);
   };
 
-  const handleGameToggle = (title: string, gameIndex: number) => {
+  // Main open with optional centering logic
+  const openWithOptionalCentering = (gameId: number, gameIndex: number) => {
+    if (!checkCoverOverflow(gameIndex)) {
+      onSetOpenGame(gameId);
+      return;
+    }
+
+    const scrolledDistance = centerGameIfNeeded(gameIndex);
+    if (scrolledDistance <= 0) {
+      onSetOpenGame(gameId);
+      return;
+    }
+
+    setupPendingOpenTimeouts(gameId);
+  };
+
+  const handleGameToggle = (gameId: number, gameIndex: number) => {
     clearPendingOpen();
 
-    if (openGame === title) {
+    if (openGame === gameId) {
       onSetOpenGame(null);
       return;
     }
 
-    if (openGame && openGame !== title) {
+    if (openGame !== null && openGame !== gameId) {
       onSetOpenGame(null);
       pendingCloseThenOpenTimeoutRef.current = window.setTimeout(() => {
-        openWithOptionalCentering(title, gameIndex);
+        openWithOptionalCentering(gameId, gameIndex);
         pendingCloseThenOpenTimeoutRef.current = null;
       }, 560);
       return;
     }
 
-    openWithOptionalCentering(title, gameIndex);
+    openWithOptionalCentering(gameId, gameIndex);
+  };
+
+  // Drag handling logic
+  const calculateDragPosition = (
+    thumbWidth: number, 
+    rect: DOMRect, 
+    clientX: number, 
+    dragOffset: number
+  ) => {
+    const thumbPx = (thumbWidth / 100) * rect.width;
+    const maxThumbX = Math.max(rect.width - thumbPx, 0);
+    if (maxThumbX <= 0) {
+      scrollToRatio(0);
+      return;
+    }
+
+    const nextX = clamp(clientX - rect.left - dragOffset, 0, maxThumbX);
+    scrollToRatio(nextX / maxThumbX);
+  };
+
+  const handlePointerMove = (event: PointerEvent) => {
+    if (!draggingRef.current) {
+      return;
+    }
+
+    const track = progressRef.current;
+    if (!track) {
+      return;
+    }
+
+    calculateDragPosition(thumbWidth, track.getBoundingClientRect(), event.clientX, dragOffsetRef.current);
+  };
+
+  const stopDragging = () => {
+    draggingRef.current = false;
   };
 
   useEffect(() => {
@@ -226,32 +277,6 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
   }, [games.length]);
 
   useEffect(() => {
-    const handlePointerMove = (event: PointerEvent) => {
-      if (!draggingRef.current) {
-        return;
-      }
-
-      const track = progressRef.current;
-      if (!track) {
-        return;
-      }
-
-      const rect = track.getBoundingClientRect();
-      const thumbPx = (thumbWidth / 100) * rect.width;
-      const maxThumbX = Math.max(rect.width - thumbPx, 0);
-      if (maxThumbX <= 0) {
-        scrollToRatio(0);
-        return;
-      }
-
-      const nextX = clamp(event.clientX - rect.left - dragOffsetRef.current, 0, maxThumbX);
-      scrollToRatio(nextX / maxThumbX);
-    };
-
-    const stopDragging = () => {
-      draggingRef.current = false;
-    };
-
     window.addEventListener("pointermove", handlePointerMove);
     window.addEventListener("pointerup", stopDragging);
 
@@ -276,15 +301,15 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
       <div className="shelf">
         {games.map((game, index) => (
           <Game
-            key={game.title}
+            key={game.id}
             containerRef={(element) => {
               gameRefs.current[index] = element;
             }}
             title={game.title}
             image={game.image}
             platform={game.platform}
-            isOpen={openGame === game.title}
-            onToggle={() => handleGameToggle(game.title, index)}
+            isOpen={openGame === game.id}
+            onToggle={() => handleGameToggle(game.id, index)}
           />
         ))}
       </div>

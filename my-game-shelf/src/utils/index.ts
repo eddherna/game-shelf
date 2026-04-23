@@ -1,0 +1,1 @@
+export { PLATFORM_CONFIG, getPlatformDisplayName, getPlatformColor, isSwitch2 } from './platformUtils';

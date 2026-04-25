@@ -10,6 +10,13 @@ interface ShelfProps {
 }
 
 const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
+  const MIN_THUMB_WIDTH_PERCENT = 16;
+  const PENDING_OPEN_DELAY_MS = 150;
+  const CLOSE_THEN_OPEN_DELAY_MS = 560;
+  const ESTIMATED_COVER_WIDTH_PX = 365;
+  const COVER_HORIZONTAL_PADDING_PX = 20;
+  const MIN_SCROLL_DISTANCE_PX = 1;
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
   const gameRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -35,7 +42,7 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
       return;
     }
 
-    const nextThumbWidth = Math.max((clientWidth / scrollWidth) * 100, 16);
+    const nextThumbWidth = Math.max((clientWidth / scrollWidth) * 100, MIN_THUMB_WIDTH_PERCENT);
     const travel = 100 - nextThumbWidth;
     const nextThumbOffset = (scrollLeft / maxScroll) * travel;
 
@@ -56,7 +63,7 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
       if (pendingId !== null) {
         onSetOpenGame(pendingId);
       }
-    }, 150);
+    }, PENDING_OPEN_DELAY_MS);
   };
 
   // Main scroll sync function
@@ -110,8 +117,8 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
 
     const containerRect = container.getBoundingClientRect();
     const gameRect = gameElement.getBoundingClientRect();
-    const estimatedCoverWidth = 365;
-    const horizontalPadding = 20;
+    const estimatedCoverWidth = ESTIMATED_COVER_WIDTH_PX;
+    const horizontalPadding = COVER_HORIZONTAL_PADDING_PX;
 
     const projectedRight = gameRect.left + estimatedCoverWidth + horizontalPadding;
     const projectedLeft = gameRect.left - horizontalPadding;
@@ -137,7 +144,7 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
     const targetScrollLeft = clamp(gameCenter - viewportCenter, 0, maxScroll);
     const distance = Math.abs(targetScrollLeft - container.scrollLeft);
 
-    if (distance < 1) {
+    if (distance < MIN_SCROLL_DISTANCE_PX) {
       return 0;
     }
 
@@ -174,7 +181,7 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
       pendingCloseThenOpenTimeoutRef.current = window.setTimeout(() => {
         openWithOptionalCentering(gameId, gameIndex);
         pendingCloseThenOpenTimeoutRef.current = null;
-      }, 560);
+      }, CLOSE_THEN_OPEN_DELAY_MS);
       return;
     }
 

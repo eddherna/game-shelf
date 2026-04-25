@@ -29,12 +29,19 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
   const [thumbOffset, setThumbOffset] = useState(0);
 
   const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+  const getMaxScroll = (scrollWidth: number, clientWidth: number) => Math.max(scrollWidth - clientWidth, 0);
+  const clearTimer = (timerRef: { current: number | null }) => {
+    if (timerRef.current !== null) {
+      window.clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
 
   // --- Refactored Functions ---
   
   // Progress thumb update logic
   const updateProgressThumb = (scrollLeft: number, scrollWidth: number, clientWidth: number) => {
-    const maxScroll = scrollWidth - clientWidth;
+    const maxScroll = getMaxScroll(scrollWidth, clientWidth);
 
     if (maxScroll <= 0) {
       setThumbWidth(100);
@@ -53,9 +60,7 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
   // Debounce: resets on every scroll event; fires 150ms after scroll settles (or immediately if no scroll comes)
   const schedulePendingOpen = (gameId: number) => {
     pendingOpenIdRef.current = gameId;
-    if (pendingOpenTimeoutRef.current !== null) {
-      window.clearTimeout(pendingOpenTimeoutRef.current);
-    }
+    clearTimer(pendingOpenTimeoutRef);
     pendingOpenTimeoutRef.current = window.setTimeout(() => {
       const pendingId = pendingOpenIdRef.current;
       pendingOpenIdRef.current = null;
@@ -86,7 +91,7 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
       return;
     }
 
-    const maxScroll = element.scrollWidth - element.clientWidth;
+    const maxScroll = getMaxScroll(element.scrollWidth, element.clientWidth);
     if (maxScroll <= 0) {
       element.scrollLeft = 0;
       return;
@@ -97,14 +102,8 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
 
   const clearPendingOpen = () => {
     pendingOpenIdRef.current = null;
-    if (pendingOpenTimeoutRef.current !== null) {
-      window.clearTimeout(pendingOpenTimeoutRef.current);
-      pendingOpenTimeoutRef.current = null;
-    }
-    if (pendingCloseThenOpenTimeoutRef.current !== null) {
-      window.clearTimeout(pendingCloseThenOpenTimeoutRef.current);
-      pendingCloseThenOpenTimeoutRef.current = null;
-    }
+    clearTimer(pendingOpenTimeoutRef);
+    clearTimer(pendingCloseThenOpenTimeoutRef);
   };
 
   // Overflow checking logic
@@ -134,7 +133,7 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
       return 0;
     }
 
-    const maxScroll = container.scrollWidth - container.clientWidth;
+    const maxScroll = getMaxScroll(container.scrollWidth, container.clientWidth);
     if (maxScroll <= 0) {
       return 0;
     }
@@ -223,6 +222,32 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
     draggingRef.current = false;
   };
 
+  const handleTrackPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    const track = progressRef.current;
+    if (!track) {
+      return;
+    }
+
+    const rect = track.getBoundingClientRect();
+    const thumbPx = (thumbWidth / 100) * rect.width;
+    const maxThumbX = Math.max(rect.width - thumbPx, 0);
+    if (maxThumbX <= 0) {
+      scrollToRatio(0);
+      return;
+    }
+
+    const nextX = clamp(event.clientX - rect.left - thumbPx / 2, 0, maxThumbX);
+    scrollToRatio(nextX / maxThumbX);
+  };
+
+  const handleThumbPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    event.stopPropagation();
+    const thumb = event.currentTarget;
+    const rect = thumb.getBoundingClientRect();
+    dragOffsetRef.current = event.clientX - rect.left;
+    draggingRef.current = true;
+  };
+
   useEffect(() => {
     syncFromScroll();
     window.addEventListener("resize", syncFromScroll);
@@ -273,23 +298,7 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
         ref={progressRef}
         className="shelf-progress"
         aria-hidden="true"
-        onPointerDown={(event) => {
-          const track = progressRef.current;
-          if (!track) {
-            return;
-          }
-
-          const rect = track.getBoundingClientRect();
-          const thumbPx = (thumbWidth / 100) * rect.width;
-          const maxThumbX = Math.max(rect.width - thumbPx, 0);
-          if (maxThumbX <= 0) {
-            scrollToRatio(0);
-            return;
-          }
-
-          const nextX = clamp(event.clientX - rect.left - thumbPx / 2, 0, maxThumbX);
-          scrollToRatio(nextX / maxThumbX);
-        }}
+        onPointerDown={handleTrackPointerDown}
       >
         <div
           className="shelf-progress-thumb"
@@ -297,13 +306,7 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
             width: `${thumbWidth}%`,
             left: `${thumbOffset}%`,
           }}
-          onPointerDown={(event) => {
-            event.stopPropagation();
-            const thumb = event.currentTarget;
-            const rect = thumb.getBoundingClientRect();
-            dragOffsetRef.current = event.clientX - rect.left;
-            draggingRef.current = true;
-          }}
+          onPointerDown={handleThumbPointerDown}
         />
       </div>
     </div>

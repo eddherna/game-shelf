@@ -1,7 +1,15 @@
 import { useEffect, useRef, useState } from "react";
+import type { MutableRefObject, PointerEvent as ReactPointerEvent } from "react";
 import Game from "../Game/Game";
 import "./Shelf.css";
 import type GameInfo from "../../models/GameInfo";
+
+const MIN_THUMB_WIDTH_PERCENT = 16;
+const PENDING_OPEN_DELAY_MS = 150;
+const CLOSE_THEN_OPEN_DELAY_MS = 560;
+const ESTIMATED_COVER_WIDTH_PX = 365;
+const COVER_HORIZONTAL_PADDING_PX = 20;
+const MIN_SCROLL_DISTANCE_PX = 1;
 
 interface ShelfProps {
   games: GameInfo[];
@@ -10,13 +18,6 @@ interface ShelfProps {
 }
 
 const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
-  const MIN_THUMB_WIDTH_PERCENT = 16;
-  const PENDING_OPEN_DELAY_MS = 150;
-  const CLOSE_THEN_OPEN_DELAY_MS = 560;
-  const ESTIMATED_COVER_WIDTH_PX = 365;
-  const COVER_HORIZONTAL_PADDING_PX = 20;
-  const MIN_SCROLL_DISTANCE_PX = 1;
-
   const scrollRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
   const gameRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -30,11 +31,27 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
 
   const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
   const getMaxScroll = (scrollWidth: number, clientWidth: number) => Math.max(scrollWidth - clientWidth, 0);
-  const clearTimer = (timerRef: { current: number | null }) => {
+  const clearTimer = (timerRef: MutableRefObject<number | null>) => {
     if (timerRef.current !== null) {
       window.clearTimeout(timerRef.current);
       timerRef.current = null;
     }
+  };
+
+  const getContainerAndGame = (gameIndex: number) => {
+    const container = scrollRef.current;
+    const gameElement = gameRefs.current[gameIndex];
+    if (!container || !gameElement) {
+      return null;
+    }
+
+    return { container, gameElement };
+  };
+
+  const getThumbMetrics = (trackWidth: number, widthPercent: number) => {
+    const thumbPx = (widthPercent / 100) * trackWidth;
+    const maxThumbX = Math.max(trackWidth - thumbPx, 0);
+    return { thumbPx, maxThumbX };
   };
 
   const updateProgressThumb = (scrollLeft: number, scrollWidth: number, clientWidth: number) => {
@@ -102,11 +119,12 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
   };
 
   const checkCoverOverflow = (gameIndex: number) => {
-    const container = scrollRef.current;
-    const gameElement = gameRefs.current[gameIndex];
-    if (!container || !gameElement) {
+    const elements = getContainerAndGame(gameIndex);
+    if (!elements) {
       return false;
     }
+
+    const { container, gameElement } = elements;
 
     const containerRect = container.getBoundingClientRect();
     const gameRect = gameElement.getBoundingClientRect();
@@ -120,11 +138,12 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
   };
 
   const centerGameIfNeeded = (gameIndex: number) => {
-    const container = scrollRef.current;
-    const gameElement = gameRefs.current[gameIndex];
-    if (!container || !gameElement) {
+    const elements = getContainerAndGame(gameIndex);
+    if (!elements) {
       return 0;
     }
+
+    const { container, gameElement } = elements;
 
     const maxScroll = getMaxScroll(container.scrollWidth, container.clientWidth);
     if (maxScroll <= 0) {
@@ -180,13 +199,12 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
   };
 
   const calculateDragPosition = (
-    thumbWidth: number, 
-    rect: DOMRect, 
-    clientX: number, 
+    thumbWidthPercent: number,
+    rect: DOMRect,
+    clientX: number,
     dragOffset: number
   ) => {
-    const thumbPx = (thumbWidth / 100) * rect.width;
-    const maxThumbX = Math.max(rect.width - thumbPx, 0);
+    const { maxThumbX } = getThumbMetrics(rect.width, thumbWidthPercent);
     if (maxThumbX <= 0) {
       scrollToRatio(0);
       return;
@@ -220,8 +238,7 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
     }
 
     const rect = track.getBoundingClientRect();
-    const thumbPx = (thumbWidth / 100) * rect.width;
-    const maxThumbX = Math.max(rect.width - thumbPx, 0);
+    const { thumbPx, maxThumbX } = getThumbMetrics(rect.width, thumbWidth);
     if (maxThumbX <= 0) {
       scrollToRatio(0);
       return;
@@ -231,7 +248,7 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
     scrollToRatio(nextX / maxThumbX);
   };
 
-  const handleThumbPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+  const handleThumbPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     event.stopPropagation();
     const thumb = event.currentTarget;
     const rect = thumb.getBoundingClientRect();

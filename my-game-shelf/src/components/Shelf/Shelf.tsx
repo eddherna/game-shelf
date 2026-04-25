@@ -37,9 +37,6 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
     }
   };
 
-  // --- Refactored Functions ---
-  
-  // Progress thumb update logic
   const updateProgressThumb = (scrollLeft: number, scrollWidth: number, clientWidth: number) => {
     const maxScroll = getMaxScroll(scrollWidth, clientWidth);
 
@@ -57,7 +54,6 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
     setThumbOffset(nextThumbOffset);
   };
 
-  // Debounce: resets on every scroll event; fires 150ms after scroll settles (or immediately if no scroll comes)
   const schedulePendingOpen = (gameId: number) => {
     pendingOpenIdRef.current = gameId;
     clearTimer(pendingOpenTimeoutRef);
@@ -71,7 +67,6 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
     }, PENDING_OPEN_DELAY_MS);
   };
 
-  // Main scroll sync function
   const syncFromScroll = () => {
     const element = scrollRef.current;
     if (!element) {
@@ -106,7 +101,6 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
     clearTimer(pendingCloseThenOpenTimeoutRef);
   };
 
-  // Overflow checking logic
   const checkCoverOverflow = (gameIndex: number) => {
     const container = scrollRef.current;
     const gameElement = gameRefs.current[gameIndex];
@@ -125,7 +119,6 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
     return projectedRight > containerRect.right || projectedLeft < containerRect.left;
   };
 
-  // Centering logic
   const centerGameIfNeeded = (gameIndex: number) => {
     const container = scrollRef.current;
     const gameElement = gameRefs.current[gameIndex];
@@ -151,7 +144,6 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
     return distance;
   };
 
-  // Main open with optional centering logic
   const openWithOptionalCentering = (gameId: number, gameIndex: number) => {
     if (!checkCoverOverflow(gameIndex)) {
       onSetOpenGame(gameId);
@@ -187,7 +179,6 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
     openWithOptionalCentering(gameId, gameIndex);
   };
 
-  // Drag handling logic
   const calculateDragPosition = (
     thumbWidth: number, 
     rect: DOMRect, 

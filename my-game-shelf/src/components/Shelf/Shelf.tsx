@@ -14,8 +14,7 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
   const progressRef = useRef<HTMLDivElement>(null);
   const gameRefs = useRef<(HTMLDivElement | null)[]>([]);
   const pendingOpenIdRef = useRef<number | null>(null);
-  const pendingOpenSettleTimeoutRef = useRef<number | null>(null);
-  const pendingOpenFallbackTimeoutRef = useRef<number | null>(null);
+  const pendingOpenTimeoutRef = useRef<number | null>(null);
   const pendingCloseThenOpenTimeoutRef = useRef<number | null>(null);
   const draggingRef = useRef(false);
   const dragOffsetRef = useRef(0);
@@ -44,27 +43,20 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
     setThumbOffset(nextThumbOffset);
   };
 
-  // Pending open operations handling
-  const handlePendingOpenOperations = () => {
-    if (pendingOpenIdRef.current !== null) {
-      if (pendingOpenSettleTimeoutRef.current !== null) {
-        window.clearTimeout(pendingOpenSettleTimeoutRef.current);
-      }
-
-      pendingOpenSettleTimeoutRef.current = window.setTimeout(() => {
-        const pendingId = pendingOpenIdRef.current;
-        pendingOpenIdRef.current = null;
-
-        if (pendingOpenFallbackTimeoutRef.current !== null) {
-          window.clearTimeout(pendingOpenFallbackTimeoutRef.current);
-          pendingOpenFallbackTimeoutRef.current = null;
-        }
-
-        if (pendingId !== null) {
-          onSetOpenGame(pendingId);
-        }
-      }, 140);
+  // Debounce: resets on every scroll event; fires 150ms after scroll settles (or immediately if no scroll comes)
+  const schedulePendingOpen = (gameId: number) => {
+    pendingOpenIdRef.current = gameId;
+    if (pendingOpenTimeoutRef.current !== null) {
+      window.clearTimeout(pendingOpenTimeoutRef.current);
     }
+    pendingOpenTimeoutRef.current = window.setTimeout(() => {
+      const pendingId = pendingOpenIdRef.current;
+      pendingOpenIdRef.current = null;
+      pendingOpenTimeoutRef.current = null;
+      if (pendingId !== null) {
+        onSetOpenGame(pendingId);
+      }
+    }, 150);
   };
 
   // Main scroll sync function
@@ -76,7 +68,9 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
 
     const { scrollLeft, scrollWidth, clientWidth } = element;
     updateProgressThumb(scrollLeft, scrollWidth, clientWidth);
-    handlePendingOpenOperations();
+    if (pendingOpenIdRef.current !== null) {
+      schedulePendingOpen(pendingOpenIdRef.current);
+    }
   };
 
   const scrollToRatio = (ratio: number) => {
@@ -94,20 +88,12 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
     element.scrollLeft = clamp(ratio, 0, 1) * maxScroll;
   };
 
-  // Refactored timeout clearing logic
   const clearPendingOpen = () => {
     pendingOpenIdRef.current = null;
-
-    if (pendingOpenSettleTimeoutRef.current !== null) {
-      window.clearTimeout(pendingOpenSettleTimeoutRef.current);
-      pendingOpenSettleTimeoutRef.current = null;
+    if (pendingOpenTimeoutRef.current !== null) {
+      window.clearTimeout(pendingOpenTimeoutRef.current);
+      pendingOpenTimeoutRef.current = null;
     }
-
-    if (pendingOpenFallbackTimeoutRef.current !== null) {
-      window.clearTimeout(pendingOpenFallbackTimeoutRef.current);
-      pendingOpenFallbackTimeoutRef.current = null;
-    }
-
     if (pendingCloseThenOpenTimeoutRef.current !== null) {
       window.clearTimeout(pendingCloseThenOpenTimeoutRef.current);
       pendingCloseThenOpenTimeoutRef.current = null;
@@ -159,43 +145,6 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
     return distance;
   };
 
-  // Timeout setup for open operations
-  const setupPendingOpenTimeouts = (gameId: number) => {
-    pendingOpenIdRef.current = gameId;
-
-    if (pendingOpenSettleTimeoutRef.current !== null) {
-      window.clearTimeout(pendingOpenSettleTimeoutRef.current);
-    }
-
-    pendingOpenSettleTimeoutRef.current = window.setTimeout(() => {
-      const pendingId = pendingOpenIdRef.current;
-      pendingOpenIdRef.current = null;
-
-      if (pendingOpenFallbackTimeoutRef.current !== null) {
-        window.clearTimeout(pendingOpenFallbackTimeoutRef.current);
-        pendingOpenFallbackTimeoutRef.current = null;
-      }
-
-      if (pendingId !== null) {
-        onSetOpenGame(pendingId);
-      }
-    }, 140);
-
-    pendingOpenFallbackTimeoutRef.current = window.setTimeout(() => {
-      const pendingId = pendingOpenIdRef.current;
-      pendingOpenIdRef.current = null;
-
-      if (pendingOpenSettleTimeoutRef.current !== null) {
-        window.clearTimeout(pendingOpenSettleTimeoutRef.current);
-        pendingOpenSettleTimeoutRef.current = null;
-      }
-
-      if (pendingId !== null) {
-        onSetOpenGame(pendingId);
-      }
-    }, 900);
-  };
-
   // Main open with optional centering logic
   const openWithOptionalCentering = (gameId: number, gameIndex: number) => {
     if (!checkCoverOverflow(gameIndex)) {
@@ -209,7 +158,7 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
       return;
     }
 
-    setupPendingOpenTimeouts(gameId);
+    schedulePendingOpen(gameId);
   };
 
   const handleGameToggle = (gameId: number, gameIndex: number) => {

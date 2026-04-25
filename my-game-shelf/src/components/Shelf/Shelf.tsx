@@ -15,14 +15,14 @@ interface ShelfProps {
 
 const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const progressRef = useRef<HTMLDivElement>(null);
+  const progressTrackRef = useRef<HTMLDivElement>(null);
   const gameRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const draggingRef = useRef(false);
+  const isDraggingRef = useRef(false);
   const dragOffsetRef = useRef(0);
-  const [thumbWidth, setThumbWidth] = useState(0);
-  const [thumbOffset, setThumbOffset] = useState(0);
+  const [thumbWidthPercent, setThumbWidthPercent] = useState(0);
+  const [thumbOffsetPercent, setThumbOffsetPercent] = useState(0);
 
-  const { handleGameToggle, handleScrollTick } = useShelfOpenFlow({
+  const { handleGameToggle, handleOpenFlowScroll } = useShelfOpenFlow({
     openGame,
     onSetOpenGame,
     scrollRef,
@@ -42,8 +42,8 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
     const maxScroll = getMaxScroll(scrollWidth, clientWidth);
 
     if (maxScroll <= 0) {
-      setThumbWidth(100);
-      setThumbOffset(0);
+      setThumbWidthPercent(100);
+      setThumbOffsetPercent(0);
       return;
     }
 
@@ -51,8 +51,8 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
     const travel = 100 - nextThumbWidth;
     const nextThumbOffset = (scrollLeft / maxScroll) * travel;
 
-    setThumbWidth(nextThumbWidth);
-    setThumbOffset(nextThumbOffset);
+    setThumbWidthPercent(nextThumbWidth);
+    setThumbOffsetPercent(nextThumbOffset);
   };
 
   const syncFromScroll = () => {
@@ -63,7 +63,7 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
 
     const { scrollLeft, scrollWidth, clientWidth } = element;
     updateProgressThumb(scrollLeft, scrollWidth, clientWidth);
-    handleScrollTick();
+    handleOpenFlowScroll();
   };
 
   const scrollToRatio = (ratio: number) => {
@@ -98,30 +98,30 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
   };
 
   const handlePointerMove = (event: PointerEvent) => {
-    if (!draggingRef.current) {
+    if (!isDraggingRef.current) {
       return;
     }
 
-    const track = progressRef.current;
+    const track = progressTrackRef.current;
     if (!track) {
       return;
     }
 
-    calculateDragPosition(thumbWidth, track.getBoundingClientRect(), event.clientX, dragOffsetRef.current);
+    calculateDragPosition(thumbWidthPercent, track.getBoundingClientRect(), event.clientX, dragOffsetRef.current);
   };
 
   const stopDragging = () => {
-    draggingRef.current = false;
+    isDraggingRef.current = false;
   };
 
   const handleTrackPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    const track = progressRef.current;
+    const track = progressTrackRef.current;
     if (!track) {
       return;
     }
 
     const rect = track.getBoundingClientRect();
-    const { thumbPx, maxThumbX } = getThumbMetrics(rect.width, thumbWidth);
+    const { thumbPx, maxThumbX } = getThumbMetrics(rect.width, thumbWidthPercent);
     if (maxThumbX <= 0) {
       scrollToRatio(0);
       return;
@@ -136,7 +136,7 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
     const thumb = event.currentTarget;
     const rect = thumb.getBoundingClientRect();
     dragOffsetRef.current = event.clientX - rect.left;
-    draggingRef.current = true;
+    isDraggingRef.current = true;
   };
 
   useEffect(() => {
@@ -156,7 +156,7 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerup", stopDragging);
     };
-  }, [thumbWidth]);
+  }, [thumbWidthPercent]);
   return (
     <div
       ref={scrollRef}
@@ -179,7 +179,7 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
         ))}
       </div>
       <div
-        ref={progressRef}
+        ref={progressTrackRef}
         className="shelf-progress"
         aria-hidden="true"
         onPointerDown={handleTrackPointerDown}
@@ -187,8 +187,8 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
         <div
           className="shelf-progress-thumb"
           style={{
-            width: `${thumbWidth}%`,
-            left: `${thumbOffset}%`,
+            width: `${thumbWidthPercent}%`,
+            left: `${thumbOffsetPercent}%`,
           }}
           onPointerDown={handleThumbPointerDown}
         />

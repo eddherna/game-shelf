@@ -21,11 +21,24 @@ interface UseShelfOpenFlowParams {
 
 interface UseShelfOpenFlowResult {
   handleGameToggle: (gameId: number, gameIndex: number) => void;
-  handleScrollTick: () => void;
+  handleOpenFlowScroll: () => void;
 }
 
+// Geometry helpers are kept together so the interaction flow reads top-to-bottom.
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 const getMaxScroll = (scrollWidth: number, clientWidth: number) => Math.max(scrollWidth - clientWidth, 0);
+const getProjectedCoverBounds = (gameLeft: number) => {
+  const projectedRight = gameLeft + ESTIMATED_COVER_WIDTH_PX + COVER_HORIZONTAL_PADDING_PX;
+  const projectedLeft = gameLeft - COVER_HORIZONTAL_PADDING_PX;
+  return { projectedLeft, projectedRight };
+};
+
+const getTargetScrollLeft = (gameElement: HTMLDivElement, clientWidth: number, maxScroll: number) => {
+  const gameCenter = gameElement.offsetLeft + gameElement.offsetWidth / 2;
+  const viewportCenter = clientWidth / 2;
+  return clamp(gameCenter - viewportCenter, 0, maxScroll);
+};
+
 const clearTimer = (timerRef: MutableRefObject<number | null>) => {
   if (timerRef.current !== null) {
     window.clearTimeout(timerRef.current);
@@ -39,11 +52,11 @@ const useShelfOpenFlow = ({
   scrollRef,
   gameRefs,
 }: UseShelfOpenFlowParams): UseShelfOpenFlowResult => {
-  const pendingOpenIdRef = useRef<number | null>(null);
-  const pendingOpenTimeoutRef = useRef<number | null>(null);
-  const pendingCloseThenOpenTimeoutRef = useRef<number | null>(null);
+  const pendingGameIdToOpenRef = useRef<number | null>(null);
+  const pendingOpenTimerRef = useRef<number | null>(null);
+  const closeThenOpenTimerRef = useRef<number | null>(null);
 
-  const getContainerAndGame = (gameIndex: number) => {
+  const getTrackedElements = (gameIndex: number) => {
     const container = scrollRef.current;
     const gameElement = gameRefs.current[gameIndex];
     if (!container || !gameElement) {
@@ -53,27 +66,27 @@ const useShelfOpenFlow = ({
     return { container, gameElement };
   };
 
-  const clearPendingOpen = () => {
-    pendingOpenIdRef.current = null;
-    clearTimer(pendingOpenTimeoutRef);
-    clearTimer(pendingCloseThenOpenTimeoutRef);
+  const clearPendingOpenFlow = () => {
+    pendingGameIdToOpenRef.current = null;
+    clearTimer(pendingOpenTimerRef);
+    clearTimer(closeThenOpenTimerRef);
   };
 
   const schedulePendingOpen = (gameId: number) => {
-    pendingOpenIdRef.current = gameId;
-    clearTimer(pendingOpenTimeoutRef);
-    pendingOpenTimeoutRef.current = window.setTimeout(() => {
-      const pendingId = pendingOpenIdRef.current;
-      pendingOpenIdRef.current = null;
-      pendingOpenTimeoutRef.current = null;
-      if (pendingId !== null) {
-        onSetOpenGame(pendingId);
+    pendingGameIdToOpenRef.current = gameId;
+    clearTimer(pendingOpenTimerRef);
+    pendingOpenTimerRef.current = window.setTimeout(() => {
+      const gameIdToOpen = pendingGameIdToOpenRef.current;
+      pendingGameIdToOpenRef.current = null;
+      pendingOpenTimerRef.current = null;
+      if (gameIdToOpen !== null) {
+        onSetOpenGame(gameIdToOpen);
       }
     }, PENDING_OPEN_DELAY_MS);
   };
 
-  const checkCoverOverflow = (gameIndex: number) => {
-    const elements = getContainerAndGame(gameIndex);
+  const doesCoverOverflowViewport = (gameIndex: number) => {
+    const elements = getTrackedElements(gameIndex);
     if (!elements) {
       return false;
     }
@@ -83,14 +96,13 @@ const useShelfOpenFlow = ({
     const containerRect = container.getBoundingClientRect();
     const gameRect = gameElement.getBoundingClientRect();
 
-    const projectedRight = gameRect.left + ESTIMATED_COVER_WIDTH_PX + COVER_HORIZONTAL_PADDING_PX;
-    const projectedLeft = gameRect.left - COVER_HORIZONTAL_PADDING_PX;
+    const { projectedLeft, projectedRight } = getProjectedCoverBounds(gameRect.left);
 
     return projectedRight > containerRect.right || projectedLeft < containerRect.left;
   };
 
-  const centerGameIfNeeded = (gameIndex: number) => {
-    const elements = getContainerAndGame(gameIndex);
+  const centerGameInViewportIfNeeded = (gameIndex: number) => {
+    const elements = getTrackedElements(gameIndex);
     if (!elements) {
       return 0;
     }
@@ -102,9 +114,7 @@ const useShelfOpenFlow = ({
       return 0;
     }
 
-    const gameCenter = gameElement.offsetLeft + gameElement.offsetWidth / 2;
-    const viewportCenter = container.clientWidth / 2;
-    const targetScrollLeft = clamp(gameCenter - viewportCenter, 0, maxScroll);
+    const targetScrollLeft = getTargetScrollLeft(gameElement, container.clientWidth, maxScroll);
     const distance = Math.abs(targetScrollLeft - container.scrollLeft);
 
     if (distance < MIN_SCROLL_DISTANCE_PX) {
@@ -115,13 +125,13 @@ const useShelfOpenFlow = ({
     return distance;
   };
 
-  const openWithOptionalCentering = (gameId: number, gameIndex: number) => {
-    if (!checkCoverOverflow(gameIndex)) {
+  const openGameUsingViewportRules = (gameId: number, gameIndex: number) => {
+    if (!doesCoverOverflowViewport(gameIndex)) {
       onSetOpenGame(gameId);
       return;
     }
 
-    const scrolledDistance = centerGameIfNeeded(gameIndex);
+    const scrolledDistance = centerGameInViewportIfNeeded(gameIndex);
     if (scrolledDistance <= 0) {
       onSetOpenGame(gameId);
       return;
@@ -130,7 +140,7 @@ const useShelfOpenFlow = ({
     schedulePendingOpen(gameId);
   };
 
-  const getTogglePlan = (gameId: number, gameIndex: number): TogglePlan => {
+  const buildTogglePlan = (gameId: number, gameIndex: number): TogglePlan => {
     if (openGame === gameId) {
       return { kind: "close-only" };
     }
@@ -142,7 +152,7 @@ const useShelfOpenFlow = ({
     return { kind: "open", gameId, gameIndex };
   };
 
-  const executeTogglePlan = (plan: TogglePlan) => {
+  const runTogglePlan = (plan: TogglePlan) => {
     if (plan.kind === "close-only") {
       onSetOpenGame(null);
       return;
@@ -150,37 +160,39 @@ const useShelfOpenFlow = ({
 
     if (plan.kind === "close-then-open") {
       onSetOpenGame(null);
-      pendingCloseThenOpenTimeoutRef.current = window.setTimeout(() => {
-        openWithOptionalCentering(plan.gameId, plan.gameIndex);
-        pendingCloseThenOpenTimeoutRef.current = null;
+      // Keep the reopen delay aligned with the close animation to avoid visual jumps.
+      closeThenOpenTimerRef.current = window.setTimeout(() => {
+        openGameUsingViewportRules(plan.gameId, plan.gameIndex);
+        closeThenOpenTimerRef.current = null;
       }, CLOSE_THEN_OPEN_DELAY_MS);
       return;
     }
 
-    openWithOptionalCentering(plan.gameId, plan.gameIndex);
+    openGameUsingViewportRules(plan.gameId, plan.gameIndex);
   };
 
   const handleGameToggle = (gameId: number, gameIndex: number) => {
-    clearPendingOpen();
-    const plan = getTogglePlan(gameId, gameIndex);
-    executeTogglePlan(plan);
+    clearPendingOpenFlow();
+    const plan = buildTogglePlan(gameId, gameIndex);
+    runTogglePlan(plan);
   };
 
-  const handleScrollTick = () => {
-    if (pendingOpenIdRef.current !== null) {
-      schedulePendingOpen(pendingOpenIdRef.current);
+  const handleOpenFlowScroll = () => {
+    // While smooth scrolling is running, keep extending the timer and open once motion settles.
+    if (pendingGameIdToOpenRef.current !== null) {
+      schedulePendingOpen(pendingGameIdToOpenRef.current);
     }
   };
 
   useEffect(() => {
     return () => {
-      clearPendingOpen();
+      clearPendingOpenFlow();
     };
   }, []);
 
   return {
     handleGameToggle,
-    handleScrollTick,
+    handleOpenFlowScroll,
   };
 };
 

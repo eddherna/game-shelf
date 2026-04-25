@@ -21,8 +21,6 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
   const dragOffsetRef = useRef(0);
   const [thumbWidth, setThumbWidth] = useState(0);
   const [thumbOffset, setThumbOffset] = useState(0);
-  const scrollAnimationFrameRef = useRef<number | null>(null);
-  const resizeTimeoutRef = useRef<number | null>(null);
 
   const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
@@ -69,24 +67,16 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
     }
   };
 
-  // Main scroll sync function with requestAnimationFrame
+  // Main scroll sync function
   const syncFromScroll = () => {
-    // Cancel previous animation frame if exists
-    if (scrollAnimationFrameRef.current) {
-      cancelAnimationFrame(scrollAnimationFrameRef.current);
+    const element = scrollRef.current;
+    if (!element) {
+      return;
     }
-    
-    // Schedule new animation frame
-    scrollAnimationFrameRef.current = requestAnimationFrame(() => {
-      const element = scrollRef.current;
-      if (!element) {
-        return;
-      }
 
-      const { scrollLeft, scrollWidth, clientWidth } = element;
-      updateProgressThumb(scrollLeft, scrollWidth, clientWidth);
-      handlePendingOpenOperations();
-    });
+    const { scrollLeft, scrollWidth, clientWidth } = element;
+    updateProgressThumb(scrollLeft, scrollWidth, clientWidth);
+    handlePendingOpenOperations();
   };
 
   const scrollToRatio = (ratio: number) => {
@@ -278,30 +268,11 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
   };
 
   useEffect(() => {
-    // Use debounced syncFromScroll for resize events
-    const handleResize = () => {
-      if (resizeTimeoutRef.current !== null) {
-        window.clearTimeout(resizeTimeoutRef.current);
-      }
-      
-      resizeTimeoutRef.current = window.setTimeout(() => {
-        syncFromScroll();
-      }, 50); // 50ms debounce
-    };
-
-    handleResize(); // Initial call
-    window.addEventListener("resize", handleResize);
+    syncFromScroll();
+    window.addEventListener("resize", syncFromScroll);
 
     return () => {
-      window.removeEventListener("resize", handleResize);
-      // Cancel resize timeout on unmount
-      if (resizeTimeoutRef.current !== null) {
-        window.clearTimeout(resizeTimeoutRef.current);
-      }
-      // Cancel animation frame on unmount
-      if (scrollAnimationFrameRef.current) {
-        cancelAnimationFrame(scrollAnimationFrameRef.current);
-      }
+      window.removeEventListener("resize", syncFromScroll);
     };
   }, [games.length]);
 
@@ -312,24 +283,12 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
     return () => {
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerup", stopDragging);
-      // Cancel animation frame on unmount
-      if (scrollAnimationFrameRef.current) {
-        cancelAnimationFrame(scrollAnimationFrameRef.current);
-      }
     };
   }, [thumbWidth]);
 
   useEffect(() => {
     return () => {
       clearPendingOpen();
-      // Cancel animation frame on unmount
-      if (scrollAnimationFrameRef.current) {
-        cancelAnimationFrame(scrollAnimationFrameRef.current);
-      }
-      // Cancel resize timeout on unmount
-      if (resizeTimeoutRef.current !== null) {
-        window.clearTimeout(resizeTimeoutRef.current);
-      }
     };
   }, []);
 

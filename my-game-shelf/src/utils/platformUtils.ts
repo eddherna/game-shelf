@@ -9,12 +9,12 @@ export const PLATFORM_CONFIG: Record<string, PlatformConfig> = {
   switch: {
     name: "switch",
     displayName: "Nintendo Switch",
-    color: "blue"
+    color: "#e60012"
   },
   switch2: {
     name: "switch2",
     displayName: "Nintendo Switch 2",
-    color: "red"
+    color: "#000"
   }
   // Add more platforms as needed
 };

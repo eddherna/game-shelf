@@ -167,6 +167,12 @@
   pointer-events: auto;
 }
 
+.cover.cover-no-image {
+  background: #fff;
+  box-shadow: 15px 0 35px rgba(0, 0, 0, 0.35);
+  border-radius: 0 4px 4px 0;
+}
+
 .game-container.rotated .spine {
   pointer-events: auto;
 }

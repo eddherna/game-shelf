@@ -132,6 +132,7 @@ const Shelf = ({ games, openGame, onSetOpenGame }: ShelfProps) => {
   };
 
   const handleThumbPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    event.preventDefault();
     event.stopPropagation();
     const thumb = event.currentTarget;
     const rect = thumb.getBoundingClientRect();

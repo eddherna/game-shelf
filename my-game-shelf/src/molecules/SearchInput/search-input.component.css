@@ -11,5 +11,12 @@
     font-size: 15px;
     padding: 10px 10px 10px 10px;
     border: solid #8f8f8f;
+    width: 100%;
+}
+
+.searchFilters {
+    padding-right: 2%;
+    padding-left: 2%;
+width: 100%;
 }
 

@@ -1,0 +1,15 @@
+.searchInput {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: #2f3640;
+    border-radius: 50px;
+    position: relative;
+    background: none;
+    color: white;
+    font-size: 15px;
+    padding: 10px 10px 10px 10px;
+    border: solid #8f8f8f;
+}
+

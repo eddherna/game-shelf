@@ -1,7 +1,7 @@
 import { useRef } from "react";
-import Game from "../Game/Game";
+import GameComponent from "../Game/game.component";
 
-import "./Shelf.css";
+import "./shelf.component.css";
 import type GameInfo from "../../models/GameInfo";
 import ShelfScrollbar from "../ShelfScrollbar/shelf-scrollbar.component";
 
@@ -11,7 +11,7 @@ interface ShelfProps {
   onSetOpenGame: (id: number | null) => void;
 }
 
-const Shelf = ({ games, openGame, onSetOpenGame: _onSetOpenGame }: ShelfProps) => {
+const ShelfComponent = ({ games, openGame, onSetOpenGame: _onSetOpenGame }: ShelfProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const gameRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -19,7 +19,7 @@ const Shelf = ({ games, openGame, onSetOpenGame: _onSetOpenGame }: ShelfProps) =
     <div ref={scrollRef} className="shelf-scroll">
       <div className="shelf">
         {games.map((game, index) => (
-          <Game
+          <GameComponent
             key={game.id}
             containerRef={(element) => {
               gameRefs.current[index] = element;
@@ -40,4 +40,4 @@ const Shelf = ({ games, openGame, onSetOpenGame: _onSetOpenGame }: ShelfProps) =
   );
 };
 
-export default Shelf;
+export default ShelfComponent;

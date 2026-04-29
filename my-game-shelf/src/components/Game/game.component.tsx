@@ -1,5 +1,5 @@
 import { memo, useEffect, useState } from "react";
-import "./Game.css";
+import "./game.component.css";
 import { getPlatformColor } from "../../utils";
 
 interface GameProps {
@@ -11,7 +11,7 @@ interface GameProps {
   containerRef?: (element: HTMLDivElement | null) => void;
 }
 
-const Game = memo(
+const GameComponent = memo(
   ({ title, image, platform, isOpen, onToggle, containerRef }: GameProps) => {
     const [isSpaced, setIsSpaced] = useState(false);
     const [canRotate, setCanRotate] = useState(false);
@@ -61,7 +61,7 @@ const Game = memo(
         {isOpen && canRotate && (
           <div
             className="open-cover-close-zone"
-            onClick={(event) => {
+            onClick={() => {
               onToggle();
             }}
           />
@@ -102,4 +102,4 @@ const Game = memo(
   },
 );
 
-export default Game;
+export default GameComponent;

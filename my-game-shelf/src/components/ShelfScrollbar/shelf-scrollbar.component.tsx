@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent, RefObject } from "react";
-import "./shelf-scrollbar.css";
+import "./shelf-scrollbar.component.css";
 
 const MIN_THUMB_WIDTH_PERCENT = 16;
 

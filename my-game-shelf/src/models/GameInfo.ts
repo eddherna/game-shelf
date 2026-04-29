@@ -1,17 +1,19 @@
-export default class GameInfo {
+export default interface GameInfo {
   id: number;
   title: string;
   image: string;
   platform: string;
   genres: string[];
   finished: boolean;
+}
 
-  constructor(id: number, title: string, image: string, platform: string, genres: string[], finished: boolean) {
-    this.id = id;
-    this.title = title;
-    this.image = image;
-    this.platform = platform;
-    this.genres = genres;
-    this.finished = finished;
-  }
+export function createGameInfo(
+  id: number,
+  title: string,
+  image: string,
+  platform: string,
+  genres: string[],
+  finished: boolean
+): GameInfo {
+  return { id, title, image, platform, genres, finished } as GameInfo;
 }

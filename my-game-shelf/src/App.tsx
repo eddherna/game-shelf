@@ -8,22 +8,35 @@ import {SearchInputComponent} from "./molecules/SearchInput/search-input.compone
 
 import {Buffer} from 'buffer';
 import type Shelf from "./models/Shelf.ts";
+import {GenreComboBoxComponent} from "./molecules/GenreComboBox/genre-combo-box.component.tsx";
 
 window.Buffer = window.Buffer || Buffer;
 
 const App: React.FC = () => {
     const [openGame, setOpenGame] = useState<number | null>(null);
-    const [shelf, setShelf] = useState<Shelf>({gamesInfo: [], genres: new Set<String>()} as Shelf);
+    const [selectedGenre, setSelectedGenre] = useState<string>("");
+    const [shelf, setShelf] = useState<Shelf>({gamesInfo: [], genres: new Set<string>()} as Shelf);
     React.useEffect(() => {
         gameInfoService.getAll().then(setShelf);
     }, []);
 
+    const normalizedGenreFilter = selectedGenre.trim().toLowerCase();
+    const filteredGames = normalizedGenreFilter
+        ? shelf.gamesInfo.filter((game) =>
+            game.genres.some((genre) => genre.toLowerCase().includes(normalizedGenreFilter))
+        )
+        : shelf.gamesInfo;
 
     return (
         <div className="app">
             <SearchInputComponent></SearchInputComponent>
+            <GenreComboBoxComponent
+                genres={shelf.genres}
+                onGenreSelect={setSelectedGenre}
+                selectedGenre={selectedGenre}
+            ></GenreComboBoxComponent>
             <ShelfComponent
-                games={shelf.gamesInfo}
+                games={filteredGames}
                 openGame={openGame}
                 onSetOpenGame={setOpenGame}
             />

@@ -1,5 +1,5 @@
 // src/App.tsx
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import "./App.css";
 import ShelfComponent from "./components/Shelf/shelf.component";
 import gameInfoService from "./service/game-info.service";
@@ -14,8 +14,8 @@ window.Buffer = window.Buffer || Buffer;
 
 const App: React.FC = () => {
     const [openGame, setOpenGame] = useState<number | null>(null);
-    const [shelf, setShelf] = useState<Shelf>({gamesInfo: [], genres: new Set<String>()} as Shelf);
-    React.useEffect(() => {
+    const [shelf, setShelf] = useState<Shelf>({gamesInfo: [], genres: new Set<string>()} as Shelf);
+    useEffect(() => {
         gameInfoService.getAll().then(setShelf);
     }, []);
 
@@ -24,9 +24,10 @@ const App: React.FC = () => {
         <div className="app">
             <SearchInputComponent></SearchInputComponent>
 
-            <GenreComboBoxComponent genres={shelf.genres} onGenreSelect={() => {}}></GenreComboBoxComponent>
+            <GenreComboBoxComponent genres={shelf.genres} onGenreSelect={() => {
+
+            }}></GenreComboBoxComponent>
             <ShelfComponent
-                games={shelf.gamesInfo}
                 games={shelf.gamesInfo}
                 openGame={openGame}
                 onSetOpenGame={setOpenGame}

@@ -1,4 +1,5 @@
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
+import scrollIntoView from "scroll-into-view-if-needed";
 import "./game.component.css";
 import { getPlatformColor } from "../../utils";
 
@@ -15,6 +16,8 @@ const GameComponent = memo(
   ({ title, image, platform, isOpen, onToggle, containerRef }: GameProps) => {
     const [isSpaced, setIsSpaced] = useState(false);
     const [canRotate, setCanRotate] = useState(false);
+    const containerElementRef = useRef<HTMLDivElement | null>(null);
+    const coverCloseZoneRef = useRef<HTMLDivElement | null>(null);
     const normalizedImage = image.trim();
     const [hasCoverImage, setHasCoverImage] = useState(
       normalizedImage.length > 0,
@@ -23,6 +26,37 @@ const GameComponent = memo(
     useEffect(() => {
       setHasCoverImage(normalizedImage.length > 0);
     }, [normalizedImage]);
+
+    useEffect(() => {
+      if (!isOpen || !containerElementRef.current) {
+        return;
+      }
+
+      const ensureVisible = () => {
+        const targetElement = coverCloseZoneRef.current ?? containerElementRef.current;
+        if (!targetElement) {
+          return;
+        }
+
+        const shelfBoundary = targetElement.closest(".shelf-scroll") ?? undefined;
+
+        scrollIntoView(targetElement, {
+          behavior: "smooth",
+          scrollMode: "if-needed",
+          block: "nearest",
+          inline: "nearest",
+          boundary: shelfBoundary,
+        });
+      };
+
+      const rafId = window.requestAnimationFrame(ensureVisible);
+      const settleTimer = window.setTimeout(ensureVisible, 430);
+
+      return () => {
+        window.cancelAnimationFrame(rafId);
+        window.clearTimeout(settleTimer);
+      };
+    }, [isOpen, isSpaced, canRotate]);
 
     useEffect(() => {
       let spacingTimer: ReturnType<typeof setTimeout>;
@@ -48,6 +82,10 @@ const GameComponent = memo(
 
     return (
       <div
+        ref={(element) => {
+          containerElementRef.current = element;
+          containerRef?.(element);
+        }}
         className={`game-container ${isSpaced ? "open-space" : ""} ${
           canRotate ? "rotated" : ""
         }`}
@@ -59,6 +97,7 @@ const GameComponent = memo(
       >
         {isOpen && canRotate && (
           <div
+            ref={coverCloseZoneRef}
             className="open-cover-close-zone"
             onClick={() => {
               onToggle();

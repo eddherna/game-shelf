@@ -4,6 +4,8 @@
   --game-height: 640px;
   --cover-width: 390px;
   --spine-width: 32px;
+  --case-depth: 10px;
+  --case-slant: 20deg;
   --space-speed: 0.4s;
   --rotate-speed: 0.5s;
 }
@@ -14,21 +16,24 @@
   position: relative;
   transition: all var(--space-speed) ease-in-out;
   cursor: pointer;
+  perspective: 1200px;
 }
 
 .game-container.open-space {
   width: var(--spine-width);
   margin-left: 15px;
-  margin-right: calc(var(--cover-width) - var(--spine-width) + 15px);
+  margin-right: calc(var(--cover-width) - var(--spine-width) + 50px);
 }
 
 .open-cover-close-zone {
   position: absolute;
-  top: 0;
-  left: var(--spine-width);
-  width: var(--cover-width);
+  width: calc(var(--cover-width));
   height: 100%;
   z-index: 1500;
+}
+
+.game-container.rotated .open-cover-close-zone {
+  transform: translateZ(160px);
 }
 
 .game-card {
@@ -38,6 +43,7 @@
   transform-style: preserve-3d;
   transition: transform var(--rotate-speed) cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: left center;
+  transform: rotateY(calc(var(--case-slant) * -1));
 }
 
 .game-container.rotated .game-card {
@@ -51,8 +57,39 @@
   height: 100%;
   z-index: 2;
   backface-visibility: hidden;
-  box-shadow: inset -1px 0 3px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    inset -1px 0 3px rgba(0, 0, 0, 0.28),
+    inset 1px 0 0 rgba(255, 255, 255, 0.12);
   overflow: hidden;
+}
+
+.spine::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: var(--case-depth);
+  background: inherit;
+  transform-origin: top left;
+  transform: translateY(calc(var(--case-depth) * -1)) skewX(-52deg);
+  filter: brightness(1.08);
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.spine::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: calc(var(--case-depth) * -1);
+  width: var(--case-depth);
+  height: 100%;
+  background: rgba(0, 0, 0, 0.22);
+  transform-origin: right top;
+  transform: skewY(-6deg);
+  box-shadow:
+    inset -1px 0 0 rgba(255, 255, 255, 0.14),
+    inset 1px 0 0 rgba(0, 0, 0, 0.3);
 }
 
 .spine-content {
@@ -73,6 +110,11 @@
 }
 
 .game-container.rotated .spine-content {
+  opacity: 0;
+}
+
+.game-container.rotated .spine::before,
+.game-container.rotated .spine::after {
   opacity: 0;
 }
 

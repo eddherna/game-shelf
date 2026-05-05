@@ -1,3 +1,18 @@
+.shelf-scroll {
+  --shelf-side-padding: clamp(16px, 4vw, 50px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  width: 100%;
+  padding-bottom: 14px;
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.shelf-scroll::-webkit-scrollbar {
+  display: none;
+}
+
 .shelf {
   display: flex;
   flex-direction: row;
@@ -5,6 +20,13 @@
   width: max-content;
   padding: clamp(14px, 3vw, 40px) var(--shelf-side-padding) 22px;
   perspective: 2000px;
-  gap: clamp(6px, 1.5vw, 10px);
+  gap: clamp(12px, 2.8vw, 20px);
+}
+
+@media (max-width: 768px) {
+  .shelf-scroll {
+    --shelf-side-padding: 14px;
+    padding-bottom: 20px;
+  }
 }
 

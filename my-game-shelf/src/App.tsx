@@ -14,29 +14,20 @@ window.Buffer = window.Buffer || Buffer;
 
 const App: React.FC = () => {
     const [openGame, setOpenGame] = useState<number | null>(null);
-    const [selectedGenre, setSelectedGenre] = useState<string>("");
-    const [shelf, setShelf] = useState<Shelf>({gamesInfo: [], genres: new Set<string>()} as Shelf);
+    const [shelf, setShelf] = useState<Shelf>({gamesInfo: [], genres: new Set<String>()} as Shelf);
     React.useEffect(() => {
         gameInfoService.getAll().then(setShelf);
     }, []);
 
-    const normalizedGenreFilter = selectedGenre.trim().toLowerCase();
-    const filteredGames = normalizedGenreFilter
-        ? shelf.gamesInfo.filter((game) =>
-            game.genres.some((genre) => genre.toLowerCase().includes(normalizedGenreFilter))
-        )
-        : shelf.gamesInfo;
 
     return (
         <div className="app">
             <SearchInputComponent></SearchInputComponent>
-            <GenreComboBoxComponent
-                genres={shelf.genres}
-                onGenreSelect={setSelectedGenre}
-                selectedGenre={selectedGenre}
-            ></GenreComboBoxComponent>
+
+            <GenreComboBoxComponent genres={shelf.genres} onGenreSelect={() => {}}></GenreComboBoxComponent>
             <ShelfComponent
-                games={filteredGames}
+                games={shelf.gamesInfo}
+                games={shelf.gamesInfo}
                 openGame={openGame}
                 onSetOpenGame={setOpenGame}
             />

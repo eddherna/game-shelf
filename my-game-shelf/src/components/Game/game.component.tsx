@@ -48,7 +48,6 @@ const GameComponent = memo(
 
     return (
       <div
-        ref={containerRef}
         className={`game-container ${isSpaced ? "open-space" : ""} ${
           canRotate ? "rotated" : ""
         }`}

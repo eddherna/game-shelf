@@ -24,9 +24,7 @@ const App: React.FC = () => {
         <div className="app">
             <SearchInputComponent></SearchInputComponent>
 
-            <GenreComboBoxComponent genres={shelf.genres} onGenreSelect={() => {
-
-            }}></GenreComboBoxComponent>
+            <GenreComboBoxComponent genres={shelf.genres} onGenresSelect={() => {}}></GenreComboBoxComponent>
             <ShelfComponent
                 games={shelf.gamesInfo}
                 openGame={openGame}

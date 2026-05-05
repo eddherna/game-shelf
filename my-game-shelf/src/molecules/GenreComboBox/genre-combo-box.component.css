@@ -1,28 +1,84 @@
 .genreComboBoxWrapper {
     display: flex;
     align-items: center;
-    width: fit-content;
-    padding-right: 2%;
-    padding-left: 2%;
+    gap: 0;
+    width: 100%;
+    padding: 0 2%;
+    height: 48px;
+}
+
+.genreComboBoxInputWrapper {
+    flex: 0 0 25%;
+    max-width: 25%;
+}
+
+.genreTagsContainer {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    align-items: center;
+    padding-left: 16px;
+    margin-left: 15px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.genreTagsContainer::-webkit-scrollbar {
+    display: none;
+}
+
+.genreTag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px 5px 14px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 50px;
+    color: white;
+    font-size: 13px;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+}
+
+.genreTag:hover {
+    background: rgba(255, 255, 255, 0.13);
+}
+
+.genreTagRemove {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    font-size: 11px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    transition: color 0.15s ease;
+    flex-shrink: 0;
+}
+
+.genreTagRemove:hover {
+    color: #ffffff;
 }
 
 .genreComboBox {
-    padding: 10px 10px 10px 10px;
+    padding: 10px 14px;
+    width: 100%;
     background: none;
-    border: solid #8f8f8f;
+    border: 1px solid #8f8f8f;
     border-radius: 50px;
     color: white;
-    font-size: 15px;
+    font-size: 14px;
     cursor: text;
-    transition: all 0.2s ease;
+    transition: border-color 0.2s ease;
     font-family: inherit;
-    appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    background-size: 16px;
-    padding-right: 32px;
-    min-width: 220px;
+    min-width: 0;
 }
 
 .genreComboBox:hover {
@@ -35,7 +91,7 @@
 }
 
 .genreComboBox::placeholder {
-    color: #cfcfcf;
+    color: #8f8f8f;
 }
 
 

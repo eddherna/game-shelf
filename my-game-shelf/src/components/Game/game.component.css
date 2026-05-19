@@ -2,6 +2,7 @@
 
 :root {
   --game-height: 640px;
+  --cover-height: 640px;
   --cover-width: 390px;
   --spine-width: 32px;
   --case-depth: 10px;
@@ -170,6 +171,7 @@
 }
 
 .icon-svg {
+  position: absolute;
   width: 18px;
   height: 18px;
   background-color: white;
@@ -179,18 +181,15 @@
   mask-size: contain;
   -webkit-mask-position: center;
   mask-position: center;
-}
-
-.icon-svg.logo-s2 {
-  height: 40px;
-  width: 32px;
-  padding-left: 1px;
+  -webkit-mask-image: url('/switch.svg');
+  mask-image: url('/switch.svg');
+  transform: rotate(-90deg);
 }
 
 .red-variant .spine-platform-icon {
   background-color: #e60012;
   height: var(--spine-width);
-  width: 52px;
+  width: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -201,7 +200,7 @@
 .cover {
   position: absolute;
   width: var(--cover-width);
-  height: 100%;
+  height: var(--cover-height);
   left: var(--spine-width);
   transform: rotateY(90deg);
   transform-origin: left;
@@ -229,16 +228,4 @@
   object-fit: cover;
   box-shadow: 15px 0 35px rgba(0, 0, 0, 0.6);
   border-radius: 0 4px 4px 0;
-}
-
-.logo-s1 {
-  -webkit-mask-image: url('/switch.svg');
-  mask-image: url('/switch.svg');
-  transform: rotate(-90deg);
-}
-
-.logo-s2 {
-  -webkit-mask-image: url('/switch2.svg');
-  mask-image: url('/switch2.svg');
-  transform: rotate(-90deg);
 }

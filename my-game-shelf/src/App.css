@@ -7,14 +7,9 @@
 	gap: clamp(12px, 2.2vw, 28px);
 	padding: clamp(12px, 2.5vw, 28px) 0 24px;
 	overflow-x: hidden;
-	transition: padding-bottom 0.25s ease;
 }
 
-.app.details-open {
-	padding-bottom: clamp(170px, 24vh, 240px);
-}
-
-.app > *:not(.game-details-panel):not(.shelf-scroll) {
+.app > * {
 	width: min(100%, 1500px);
 }
 
